@@ -18,6 +18,13 @@ The user inputs used in the power simulation function are:
 * Alpha: alpha value for significance level of experiments
 * Number of simulations: the number of simulations to run per provided sample/effect size combos
 
+### Reactive Outputs
+The app displays:
+
+* A table of selected data
+* A table of power vs. sample size or effect size (whichever is varied)
+* A plot of power vs. sample size or effect size (whichever is varied)
+
 ### Packages required
 Several packages are used in the app and can be installed using:
 ```R
