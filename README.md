@@ -1,5 +1,5 @@
 # simulatePower
-Shiny app for power analysis simulations
+Shiny app for power analysis simulations available here: https://marisalyn.shinyapps.io/powerAnalysisApp_v1/ 
 
 ### About 
 This is a shiny app which runs power simulations based on user-uploaded data and parameters. The simulations are based an experimental design in which 50 perecent of the sample is assigned to treatment and 50 percent is assigned to control. A bootstrapping approach is used in each simulation to generate the treatment and control groups. In each rep, the function randomly samples (with replacement) N/2 rows and assigns them to treatment. It then samples an additional N/2 rows and assign them to control where N = the total sample size. The function assumes a homogeneous treatment effect and reduces the specified outcome variable by this amount. For example, if the effect is 5 percent, then the outcome variable for each individual in the treatment group is multiplied by 0.95. Then, an OLS model of the form: 
