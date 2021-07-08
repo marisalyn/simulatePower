@@ -1,4 +1,4 @@
-## create function for simulating power using an OLS
+## create function for simulating power using an OLS regression
 
 ## inputs:
 # df: cleaned, subsetted dataframe to use for the simulation

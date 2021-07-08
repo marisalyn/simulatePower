@@ -267,9 +267,6 @@ server <- function(input, output, session) {  # session is used to updateSelectI
 }
 
 
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
-##                  link app                 ##
-## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 shinyApp(ui, server)
 
