@@ -34,9 +34,8 @@ ui <- fluidPage(
         bg = pal["white"], 
         fg = pal["black"], 
         primary = pal["blue"],
-        secondary = pal["orange"],
         success = pal["green"],
-        info = pal["purple"],
+        info = pal["orange"],
         warning = pal["yellow"],
         danger = pal["pink"],
         ),
@@ -101,9 +100,7 @@ ui <- fluidPage(
         ), 
         bsCollapsePanel(
             title = "Select Sample and Effect Size", 
-            tags$p(tags$h4("Select Sample and Effect Size")),
-            
-            # INPUT: sample size vs effect size
+
             tags$p(tags$strong("Do you want to vary the sample size or effect size?")),
             radioButtons(
                 inputId = "ssOrEs", 
@@ -147,35 +144,23 @@ ui <- fluidPage(
         bsCollapsePanel(
             title = "Select Simulation Parameters", 
             
-            # Horizontal line ----
-            tags$hr(), 
-            
-            tags$p(tags$h4("Select Simulation Parameters")),
-            
-            # INPUT: alpha
             tags$p(tags$strong("Select alpha value between 0.01 and 0.1 for significance level")),
-            numericInput(inputId = "alpha", 
-                         label = NULL, 
-                         value = 0.05, min = 0.01, max = 0.1),
+            numericInput(inputId = "alpha", label = NULL, value = 0.05, min = 0.01, max = 0.1),
             
-            # INPUT: number of sims
             tags$p(tags$strong("Enter number of repetitions to run per sample/effect size"), 
                    tags$br(), "(Value must be between 1 and 500)"),
-            numericInput(inputId = "sims", 
-                         label = NULL, 
-                         value = 100, min = 1, max = 500),
+            numericInput(inputId = "sims", label = NULL, value = 100, min = 1, max = 500),
             
-            # numeric input for seed 
             tags$p(tags$strong("Enter seed value"), tags$br(), 
                    "Remember your seed value if you wish to reproduce your results!"),
-            numericInput(inputId = "seed", 
-                         label = NULL, 
-                         value = 123),
+            numericInput(inputId = "seed", label = NULL, value = 123),
             
-            # Horizontal line ----
-            tags$hr(), 
+            actionButton('next4', "Next", class = "btn btn-info btn-block")
+        
+        ), 
+        bsCollapsePanel(
+            title = "Run Simulation", 
             
-            # run simulation
             actionButton(inputId = "simulate", label = "Run Power Simulation")
         )
     )),
@@ -235,6 +220,15 @@ server <- function(input, output, session) {  # session is used to updateSelectI
             )
     })
     
+    observeEvent(input$next4, {
+        updateCollapse(
+            session, id = "collapse_main",
+            open = "Run Simulation",
+            close = "Select Simulation Parameters"
+        )
+    })
+    
+
     # GET DATA
     header <- reactive({
         if(input$header == "Yes"){
