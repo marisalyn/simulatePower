@@ -172,14 +172,17 @@ ui <- fluidPage(
 server <- function(input, output, session) {  # session is used to updateSelectInput
     
     # GET DATA
+    header <- reactive({
+        if(input$header == "Yes"){
+            return(TRUE)
+        } else {
+            return(FALSE)
+        }
+    })
+    
     datFull <- reactive({       
         inFile <- input$file
-        req(inFile)
-        header <- reactive({
-            if(input$header == "Yes")
-                return(TRUE)
-            FALSE
-        })
+        req(inFile, header)
         df <- read.csv(inFile$datapath, header = header()) ## could update to allow for diff file formats 
         vars <- colnames(df)
         updateSelectizeInput(session, "predictorVars","Select Predictor Variables", choices = vars)
@@ -189,12 +192,11 @@ server <- function(input, output, session) {  # session is used to updateSelectI
     
     # OUTPUT: datatable of uploaded data based on selected outcome and predictor vars
     output$dataTable <-  DT::renderDataTable({ 
-            df <- datFull()
-            vars <- input$predictorVars
-            vars <- c(vars, input$outcomeVar)
-            subset(df, select = vars) #subsetting takes place here
+        req(datFull(), input$predictorVars, input$outcomeVar)
+        
+        vars <- c(input$predictorVars, input$outcomeVar)
+        subset(datFull(), select = vars) 
     })
-    
     
     # SIMULATE 
     observeEvent(input$simulate, {
