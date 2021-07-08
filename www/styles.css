@@ -1,4 +1,7 @@
 hr {
-  border-top: 2px solid #8b1c3f
-  
+  border-top: 2px solid #00c2de
+}
+
+.btn {
+    border-radius: 6px;
 }

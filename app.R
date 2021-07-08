@@ -4,9 +4,21 @@ library(shinyBS)
 library(shinyjs)
 library(DT)
 library(dplyr)
-library(shinythemes)
+library(bslib)
 library(ggplot2)
+
 source("simulatePowerFunction.R")
+
+pal = c(
+    "white" = "#FFFFFF",
+    "black" = "#000000",
+    "pink" = "#da7fc7", 
+    "blue" = "#00c2de",
+    "green" = "#94d600", 
+    "yellow" = "#ffd800", 
+    "purple" = "#bc84cb", 
+    "orange" = "#ff8500"
+)
 
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
@@ -16,10 +28,18 @@ source("simulatePowerFunction.R")
 ui <- fluidPage(
     useShinyjs(),
     includeCSS("www/styles.css"),
-    theme = shinytheme("cerulean"),
-    
-    # MODIFY CSS
-   # tags$head(tags$style(HTML("hr {border-top: 2px solid #8b1c3f;}"))),
+    theme = bslib::bs_theme(
+        version=3, 
+        bootswatch = "readable",
+        bg = pal["white"], 
+        fg = pal["black"], 
+        primary = pal["blue"],
+        secondary = pal["orange"],
+        success = pal["green"],
+        info = pal["purple"],
+        warning = pal["yellow"],
+        danger = pal["pink"],
+        ),
 
     # application title
     titlePanel("Power Simulations"),
@@ -35,7 +55,7 @@ ui <- fluidPage(
             tags$p("This application runs power simulations based data and parameters you input below. 
                    The simulations are run using an OLS model. Before starting, make sure your dataset includes columns of
                    any variable transformations you want to include in your model and save the dataset in CSV format."),
-            actionButton('next0', "Next") # class = "btn btn-info btn-block"
+            actionButton('next0', "Next", class = "btn btn-info btn-block")
         ), 
         bsCollapsePanel(
             title = "Upload Data", 
@@ -49,7 +69,7 @@ ui <- fluidPage(
                 label = NULL, 
                 choices = c("Yes", "No")
                 ),
-            actionButton('next1', "Next") # class = "btn btn-info btn-block"
+            actionButton('next1', "Next", class = "btn btn-info btn-block")
         ), 
         bsCollapsePanel(
             title = "Select Variables", 
@@ -77,7 +97,7 @@ ui <- fluidPage(
                 choices = c("Yes", "No"), 
                 selected = "No"
                 ), 
-            actionButton('next2', "Next") # class = "btn btn-info btn-block"
+            actionButton('next2', "Next", class = "btn btn-info btn-block")
         ), 
         bsCollapsePanel(
             title = "Select Sample and Effect Size", 
@@ -121,7 +141,7 @@ ui <- fluidPage(
                 numericInput(inputId = "ss", label = NULL, 
                              value = NULL,min = 1, max = 1000000)
             ), 
-            actionButton('next3', "Next") # class = "btn btn-info btn-block"
+            actionButton('next3', "Next", class = "btn btn-info btn-block")
             
         ), 
         bsCollapsePanel(
