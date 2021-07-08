@@ -32,7 +32,7 @@ simulatePower <-
     
     set.seed(seed)
     
-    # throw warning if outcome greater than 1
+    # throw error if outcome greater than 1
     if (length(outcome) > 1)
       stop("Only 1 outcome predictor allowed!")
   
