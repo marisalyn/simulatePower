@@ -12,13 +12,12 @@ source("simulatePowerFunction.R")
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 ui <- fluidPage(
-    
+    includeCSS("www/styles.css"),
     theme = shinytheme("cerulean"),
     
     # MODIFY CSS
-    tags$head(tags$style(HTML("hr {border-top: 2px solid #8b1c3f;}"))),
-    
-    
+   # tags$head(tags$style(HTML("hr {border-top: 2px solid #8b1c3f;}"))),
+
     # application title
     titlePanel("Power Simulations"),
     
