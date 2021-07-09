@@ -54,8 +54,8 @@ ui <- fluidPage(
                        any variable transformations you want to include in your model and save the dataset in CSV format."),
         
         sidebarPanel(bsCollapse(
-            id = "collapse_main",
-            multiple = TRUE,
+            id = "mainCollapse",
+            multiple = FALSE,
             open = c("Upload Data"),
             bsCollapsePanel(
                 title = "Upload Data", 
@@ -98,7 +98,7 @@ ui <- fluidPage(
                     selected = "No"
                     ), 
                 actionButton('next2', "Next", class = "btn btn-info btn-block")
-            ), 
+            ),  
             bsCollapsePanel(
                 title = "Select Sample and Effect Size", 
 
@@ -174,7 +174,10 @@ ui <- fluidPage(
             ), 
             bsCollapsePanel(
                 title = "Run Simulation", 
-                
+                tags$div(
+                    id="helpTextSim", 
+                    helpText("Select input data and variables to run your simulation!")
+                ), 
                 actionButton(inputId = "simulate", label = "Run Power Simulation")
             )
         )),
@@ -190,7 +193,7 @@ ui <- fluidPage(
                    ), 
             column(12, 
                    tags$div(
-                       id="helpText", 
+                       id="helpTextOuputs", 
                        helpText("Select your inputs and hit the 'run simulation' button to view estimated power!"))
                    ), 
             column(12, 
@@ -208,13 +211,13 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {  
     
-    # set up next buttons -----------------------------------------------------
-    shinyjs::disable(id="next1")
-    shinyjs::disable(id="next2")
+    # set up buttons ----------------------------------------------------------
+    shinyjs::disable(id="simulate")
     
+    # click through "next" buttons --------------------------------------------
     observeEvent(input$next1, {
         updateCollapse(
-            session, id = "collapse_main", 
+            session, id = "mainCollapse", 
             open = "Select Variables", 
             close = "Upload Data"
         )
@@ -222,7 +225,7 @@ server <- function(input, output, session) {
     
     observeEvent(input$next2, {
         updateCollapse(
-            session, id = "collapse_main", 
+            session, id = "mainCollapse", 
             open = "Select Sample and Effect Size", 
             close = "Select Variables"
             )
@@ -230,7 +233,7 @@ server <- function(input, output, session) {
     
     observeEvent(input$next3, {
         updateCollapse(
-            session, id = "collapse_main",
+            session, id = "mainCollapse",
             open = "Select Simulation Parameters", 
             close = "Select Sample and Effect Size"
             )
@@ -238,7 +241,7 @@ server <- function(input, output, session) {
     
     observeEvent(input$next4, {
         updateCollapse(
-            session, id = "collapse_main",
+            session, id = "mainCollapse",
             open = "Run Simulation",
             close = "Select Simulation Parameters"
         )
@@ -268,9 +271,11 @@ server <- function(input, output, session) {
     
     observeEvent(c(input$predictorVars, input$outcomeVar), {
         if (length(input$predictorVars) >= 1 & length(input$outcomeVar) == 1) {
-            shinyjs::enable("next2")
+            shinyjs::hide("helpTextSim")
+            shinyjs::enable("simulate")
         } else{
-            shinyjs::disable("next2")
+            shinyjs::show("helpTextSim")
+            shinyjs::disable("simulate")
         }
     })
     
@@ -310,8 +315,6 @@ server <- function(input, output, session) {
     # simulate ----------------------------------------------------------------
     results <- eventReactive(input$simulate, {
         
-        "Select your inputs and hit the 'run simulation' button!"
-        
         logOut <- if_else(input$logOutcome == "Yes", TRUE, FALSE)
 
         # simulate
@@ -330,20 +333,22 @@ server <- function(input, output, session) {
             
         })
         
-        shinyjs::hide("helpText")
+        shinyjs::hide("helpTextOuputs")
+        
         results
     })
     
     # show results ------------------------------------------------------------
-    output$resultsTable <-  DT::renderDataTable({ 
+    output$resultsTable <- DT::renderDataTable({ 
+        print(results())
+        req(length(results()) > 0 )
         results() %>%
             datatable() %>%
             formatRound(columns=colnames(results())[2], digits=3)
     })
-    
-    
-    output$powerPlot <- renderPlotly({
 
+    output$powerPlot <- renderPlotly({
+        req(length(results()) > 0 )
         if(input$ssOrEs == "Sample Size"){
             x <- N()
             xlab <- "Sample Size"
