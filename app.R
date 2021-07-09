@@ -73,8 +73,15 @@ ui <- fluidPage(
             bsCollapsePanel(
                 title = "Select Variables", 
                 
+                tags$p(tags$strong("Choose the outcome variable you want in your model")),
+                pickerInput(
+                    inputId = "outcomeVar", 
+                    label = NULL,
+                    choices = NULL,
+                    multiple = FALSE
+                ),  
+                
                 tags$p(tags$strong("Choose predictor variables you want to include in your model")),
-    
                 pickerInput(
                     inputId = "predictorVars", 
                     label = NULL,
@@ -83,14 +90,7 @@ ui <- fluidPage(
                     options = list('actions-box'= TRUE), 
                     ),
                 
-                tags$p(tags$strong("Choose the outcome variable you want in your model")),
-                pickerInput(
-                    inputId = "outcomeVar", 
-                    label = NULL,
-                    choices = NULL,
-                    multiple = FALSE
-                    ),  
-                
+
                 tags$p(tags$strong("Do you want the outcome variable to be log transformed?")),
                 radioButtons(
                     inputId = "logOutcome", 
@@ -289,10 +289,7 @@ server <- function(input, output, session) {
     })
 
     observeEvent(input$predictorVars, {
-        print("here")
         varsAvail <- setdiff(names(dfFull()), input$predictorVars)
-        print(varsAvail)
-        print(input$predictorVars)
         updatePickerInput(
             session = session,
             inputId = "outcomeVar", 
