@@ -221,11 +221,7 @@ server <- function(input, output, session) {  # session is used to updateSelectI
 
     # GET DATA
     header <- reactive({
-        if(input$header == "Yes"){
-            return(TRUE)
-        } else {
-            return(FALSE)
-        }
+        if_else(input$header == "Yes", TRUE, FALSE)
     })
     
     datFull <- reactive({       
