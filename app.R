@@ -182,10 +182,14 @@ ui <- fluidPage(
 ##                  server                   ##
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
-server <- function(input, output, session) {  # session is used to updateSelectInput
+server <- function(input, output, session) {  
     
+    # set up next buttons -----------------------------------------------------
     shinyjs::disable(id="next1")
-
+    shinyjs::disable(id="next2")
+    shinyjs::disable(id="next3")
+    shinyjs::disable(id="next4")
+    
     observeEvent(input$next1, {
         updateCollapse(
             session, id = "collapse_main", 
@@ -218,16 +222,16 @@ server <- function(input, output, session) {  # session is used to updateSelectI
         )
     })
     
-
-    # GET DATA
+    # grab data from file -----------------------------------------------------
     header <- reactive({
+        updateSelectizeInput(session, "predictorVars","Select Predictor Variables", choices = c())
+        updateSelectizeInput(session, "outcomeVar","Select Outcome Variable", choices = c())
         if_else(input$header == "Yes", TRUE, FALSE)
     })
     
-    datFull <- reactive({       
-        inFile <- input$file
-        req(inFile)
-        df <- read.csv(inFile$datapath, header = header()) ## could update to allow for diff file formats 
+    dfFull <- reactive({       
+        req(input$file)
+        df <- read.csv(input$file$datapath, header = header()) ## could update to allow for diff file formats 
         shinyjs::enable(id="next1")
         vars <- colnames(df)
         updateSelectizeInput(session, "predictorVars","Select Predictor Variables", choices = vars)
@@ -235,12 +239,22 @@ server <- function(input, output, session) {  # session is used to updateSelectI
         df
     })
     
+    vars <- reactive({
+        req(input$file, input$predictorVars, input$outcomeVar)
+        c(input$predictorVars, input$outcomeVar)
+    })
+    
+    # get dataframe
+    df <-  reactive({ 
+        req(dfFull(), vars())
+        subset(dfFull(), select = vars()) 
+    })
+    
     # OUTPUT: datatable of uploaded data based on selected outcome and predictor vars
     output$dataTable <-  DT::renderDataTable({ 
-        req(datFull(), input$predictorVars, input$outcomeVar)
-        vars <- c(input$predictorVars, input$outcomeVar)
-        subset(datFull(), select = vars) 
+        df()
     })
+    
     
     # SIMULATE 
     observeEvent(input$simulate, {
@@ -261,14 +275,7 @@ server <- function(input, output, session) {  # session is used to updateSelectI
             es <- reactive(seq(from = input$esMin, to = input$esMax, by = input$esBy))
         }
         
-        # get dataframe
-        df <-  reactive({ 
-            df <- datFull()
-            vars <- input$predictorVars
-            vars <- c(vars, input$outcomeVar)
-            df <- subset(df, select = vars) #subsetting takes place here
-            df
-        })
+        df <- df()
         
         # simulate
         withProgress(message = "Running Power Simulation", value = 0, {
