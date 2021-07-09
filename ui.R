@@ -87,8 +87,8 @@ ui <- fluidPage(
                     sliderTextInput(
                         inputId = "ss",
                         label = NULL, 
-                        choices = seq(0, 1000000, by=1000), 
-                        selected = c(10000, 100000)
+                        choices = seq(1000, 1000000, by=1000), 
+                        selected = c(10000, 50000)
                     ), 
                     
                     tags$p("Select an effect size as a fraction of the difference in means, e.g. 0.05 = 5 percent difference in means)"),
@@ -96,7 +96,7 @@ ui <- fluidPage(
                         inputId = "es",
                         label = NULL, 
                         choices = seq(0.01, 0.5, by=0.01), 
-                        selected = 0.05
+                        selected = 0.02
                     )
                 ),
                 
@@ -116,7 +116,7 @@ ui <- fluidPage(
                     sliderTextInput(
                         inputId = "es",
                         label = NULL, 
-                        choices = seq(0, 1000000, by=1000), 
+                        choices = seq(1000, 1000000, by=1000), 
                         selected = 50000
                     )
                 ), 
@@ -146,21 +146,18 @@ ui <- fluidPage(
         )),
 
         mainPanel(
-            column(8, 
-                   tags$p(tags$h3("Estimated Statistical Power")),
-                   plotlyOutput("powerPlot", height = "10px")
-                   ), 
-            column(4, 
-                   DT::dataTableOutput(outputId = "resultsTable")
-                   ), 
             column(12, 
+                   tags$p(tags$h3("Estimated Statistical Power")), 
                    tags$div(
                        id="helpTextOuputs", 
-                       helpText("Select your inputs and hit the 'run simulation' button to view estimated power!"))
-                   ), 
-            column(12, 
+                       helpText("Select your inputs and hit the 'run simulation' button to view estimated power!")
+                       ), 
+                   column(8, plotlyOutput("powerPlot", height = "10px")), 
+                   column(4, reactable::reactableOutput(outputId = "resultsTable")), 
+                   tags$br(), 
+                   tags$hr(),
                    tags$p(tags$h3("Selected Data")),
-                   DT::dataTableOutput(outputId = "dataTable")
+                   reactable::reactableOutput(outputId = "dataTable")
                    )
         )
     )

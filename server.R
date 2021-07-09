@@ -80,6 +80,8 @@ server <- function(input, output, session) {
     df
   })
   
+  # update picker inputs -----------------------------------------------------
+  
   observeEvent(input$predictorVars, {
     varsAvail <- setdiff(names(dfFull()), input$predictorVars)
     updatePickerInput(
@@ -122,7 +124,7 @@ server <- function(input, output, session) {
   
   # display data selected --------------------------------------------------
   
-  output$dataTable <-  DT::renderDataTable({ df() })
+  output$dataTable <-  reactable::renderReactable({  reactable(df()) })
   
   
   # get sample and effect size(s) -N----------------------------------------
@@ -145,26 +147,25 @@ server <- function(input, output, session) {
       seq(from = es1, to = es2, by = (es2-es1)/10)
     }
   })
-  
-  
+
   # simulate ----------------------------------------------------------------
   results <- eventReactive(input$simulate, {
     
     logOut <- if_else(input$logOutcome == "Yes", TRUE, FALSE)
     
-    # simulate
-    withProgress(message = "Running Power Simulation", value = 0, {
-      results <- simulatePower(
-        df(),
-        input$alpha, 
-        input$sims, 
-        es(), 
-        N(), 
-        input$outcomeVar, 
-        input$predictorVars, 
-        logOutcome = logOut
-      )
-      
+    withProgress(
+      message = "Running Power Simulation", 
+      value = 0, {
+        results <- simulatePower(
+          df(),
+          input$alpha, 
+          input$sims, 
+          es(), 
+          N(), 
+          input$outcomeVar, 
+          input$predictorVars, 
+          logOutcome = logOut
+        )
     })
     
     shinyjs::hide("helpTextOuputs")
@@ -173,13 +174,12 @@ server <- function(input, output, session) {
   })
   
   # show results ------------------------------------------------------------
-  output$resultsTable <- DT::renderDataTable({ 
-    req(length(results()) > 0 )
+  output$resultsTable <- reactable::renderReactable({
+    req(length(results()) > 0)
     results() %>%
-      datatable() %>%
-      formatRound(columns=colnames(results())[2], digits=3)
+      reactable()
   })
-  
+
   output$powerPlot <- renderPlotly({
     req(length(results()) > 0 )
     if(input$ssOrEs == "Sample Size"){
@@ -207,8 +207,7 @@ server <- function(input, output, session) {
       labs(x=xlab, y="Power", title=title) +
       theme_minimal() 
     
-    plotly::ggplotly(p, tooltip="text") %>% 
-      plotly::layout(height = "auto")
+    plotly::ggplotly(p, tooltip="text", height = 600)
   })
 }
 

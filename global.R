@@ -4,7 +4,7 @@ library(shinyBS)
 library(shinyjs)
 library(bslib)
 library(tidyverse)
-library(DT)
+library(reactable)
 library(plotly)
 
 source("simulatePowerFunction.R")
