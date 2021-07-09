@@ -19,3 +19,7 @@ pal = c(
   "purple" = "#bc84cb", 
   "orange" = "#ff8500"
 )
+
+#TODO:
+# trtFrac
+# intro text

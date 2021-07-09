@@ -91,7 +91,7 @@ ui <- fluidPage(
                         selected = 0.02
                     )
                 ),
-                
+
                 # show if want to vary effect size 
                 # i.e. select multiple effect sizes and one sample size
                 conditionalPanel(
@@ -113,7 +113,6 @@ ui <- fluidPage(
                     )
                 ), 
                 actionButton('next3', "Next", class = "btn btn-info btn-block")
-                
             ), 
             bsCollapsePanel(
                 title = "Select Simulation Parameters", 

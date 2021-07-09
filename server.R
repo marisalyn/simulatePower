@@ -154,6 +154,7 @@ server <- function(input, output, session) {
           input$sims, 
           es(), 
           N(), 
+          trtFrac=0.5,
           input$outcomeVar, 
           input$predictorVars
         )

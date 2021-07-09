@@ -7,6 +7,7 @@
 # effectSize: the effect size(s) to test
 # N: the sample size(s) to test
 #     [note only effect size or N may be more than one value]
+# trtFrac: fraction of sample size assigned to treatment
 # outcome: the outcome variable of interest, 
 #     provided in quotations, e.g. "waterUse" 
 #     [note: only one outcome variable is allowed]
@@ -15,26 +16,26 @@
 ## outputs:
 # dataframe of tested effect/sample sizes and associated power
 
-
 simulatePower <-
   function(df,
            alpha,
            sims,
            effectSize,
            N,
+           trtFrac, # TODO
            outcome,
            predictors, 
+           shiny = TRUE, 
            seed = 123) {
     
     set.seed(seed)
     
-    # throw error if outcome greater than 1
+    outcome_sym <- ensym(outcome)
+    
     if (length(outcome) > 1)
       stop("Only 1 outcome predictor allowed!")
-  
-    # throw warning if both effectSize and N greater than 1
-    if (length(N) > 1 &
-        length(effectSize) > 1)
+
+    if (length(N) > 1 & length(effectSize) > 1)
       stop(" \n Both N and effectSize are greater than length 1!")
     
     # reset rownames dataframe
@@ -47,31 +48,32 @@ simulatePower <-
         n = N[j]
         
         # increment progress for shiny app
-        incProgress(j/length(N), detail = paste("Simulating Sample Size:", n))
+        if (shiny){
+          incProgress(j/length(N), detail = paste("Simulating Sample Size:", n))
+        } 
         
         significantExperiments <- rep(NA, sims)
         for (i in 1:sims) {
-          trt <- df[sample(nrow(df), size = 0.5 * n, replace = TRUE),]
-          trt$trt <- 1
-          cntrl <- df[sample(nrow(df), size = 0.5 * n, replace = TRUE),]
-          cntrl$trt <- 0
-          sampleDat <- rbind(trt, cntrl)
-          sampleDat$y <- ifelse(sampleDat$trt == 1 ,
-                                (1 - effectSize) * sampleDat[[outcome]],
-                                sampleDat[[outcome]]) # estimate effect size
-          modelDat <- sampleDat %>% select(-c(outcome))
-          modelDat$trt <- as.factor(modelDat$trt)
+          sampleDat <- df %>% 
+            sample_n(., n, replace = TRUE) %>%
+            mutate(
+              trt = sample(c(1,0), size=n, replace=TRUE, prob=c(trtFrac, (1-trtFrac))), 
+              y = if_else(trt == 1, (1 - effectSize) * !!outcome_sym, as.numeric(!!outcome_sym)), 
+              trt = as.factor(trt)
+              ) %>% 
+            select(- !!outcome_sym)
           
-          fit <- lm(y ~ ., data = modelDat)
+
+          fit <- lm(y ~ ., data = sampleDat)
           
           p <- summary(fit)$coefficients["trt1", 4]  # p-val of trt
-          significantExperiments[i] <-
-            (p <= alpha) # 1 if experiment has significant trt
+          
+          # 1 if experiment has significant trt
+          significantExperiments[i] <- (p <= alpha) 
         }
         powers[j] <- mean(significantExperiments)
       }
       results <- as.data.frame(cbind(N, powers))
-      
     }
     
     # if testing multiple effect sizes
@@ -81,23 +83,22 @@ simulatePower <-
         effect = effectSize[j]
         
         # increment progress for shiny app
-        incProgress(j/length(effectSize), detail = paste("Simulating Effect Size:", effect))
+        if (shiny){
+          incProgress(j/length(effectSize), detail = paste("Simulating Effect Size:", effect))
+        } 
         
         significantExperiments <- rep(NA, sims)
         for (i in 1:sims) {
-          trt <- df[sample(nrow(df), size = 0.5 * N, replace = TRUE),]
-          trt$trt <- 1
-          cntrl <-
-            df[sample(nrow(df), size = 0.5 * N, replace = TRUE),]
-          cntrl$trt <- 0
-          sampleDat <- rbind(trt, cntrl)
-          sampleDat$y <- ifelse(sampleDat$trt == 1 ,
-                                (1 - effect) * sampleDat[[outcome]],
-                                sampleDat[[outcome]]) # estimate effect size
-          modelDat <- sampleDat %>% select(-c(outcome))
-          modelDat$trt <- as.factor(modelDat$trt)
-          
-          fit <- lm(y ~ ., data = modelDat)
+          sampleDat <- df %>% 
+            sample_n(., N, replace = TRUE) %>%
+            mutate(
+              trt = sample(c(1,0), size=N, replace=TRUE, prob=c(trtFrac, (1-trtFrac))), 
+              y = if_else(trt == 1, (1 - effect) * !!outcome_sym, as.numeric(!!outcome_sym)), 
+              trt = as.factor(trt)
+            ) %>% 
+            select(-!!outcome_sym)
+
+          fit <- lm(y ~ ., data = sampleDat)
           
           p <- summary(fit)$coefficients["trt1",4]     # p-val of trt
           significantExperiments[i] <- (p <= alpha) # 1 if experiment has significant trt
@@ -108,5 +109,7 @@ simulatePower <-
     }
     return(results)
   }
+
+
 
 
