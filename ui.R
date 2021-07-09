@@ -147,18 +147,26 @@ ui <- fluidPage(
 
         mainPanel(
             column(12, 
-                   tags$p(tags$h3("Estimated Statistical Power")), 
                    tags$div(
-                       id="helpTextOuputs", 
-                       helpText("Select your inputs and hit the 'run simulation' button to view estimated power!")
+                       id = "outputs", 
+                       tags$p(tags$h3("Estimated Statistical Power")), 
+                       tags$div(
+                           id="helpTextOuputs", 
+                           helpText("Select your inputs and hit the 'run simulation' button to view estimated power!")
                        ), 
-                   column(8, plotlyOutput("powerPlot", height = "10px")), 
-                   column(4, reactable::reactableOutput(outputId = "resultsTable")), 
-                   tags$br(), 
-                   tags$hr(),
-                   tags$p(tags$h3("Selected Data")),
-                   reactable::reactableOutput(outputId = "dataTable")
+                       column(8, plotlyOutput("powerPlot", height = "auto")), 
+                       column(4, reactable::reactableOutput(outputId = "resultsTable"))
                    )
-        )
+                   ), 
+            column(12, 
+                   tags$div(
+                       id = "data",
+                       tags$br(), 
+                       tags$hr(),
+                       tags$p(tags$h3("Selected Data")),
+                       reactable::reactableOutput(outputId = "dataTable")
+                   )
+                   )
+            )
     )
 )

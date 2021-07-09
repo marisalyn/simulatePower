@@ -176,8 +176,17 @@ server <- function(input, output, session) {
   # show results ------------------------------------------------------------
   output$resultsTable <- reactable::renderReactable({
     req(length(results()) > 0)
-    results() %>%
-      reactable()
+    if(input$ssOrEs == "Sample Size"){
+      results() %>%
+        rename("Power" = "powers", "Sample size" = "N") %>%
+        reactable()
+    } else{
+      print(results())
+      results() %>%
+        rename("Power" = "powers", "Sample size" = "N") %>%
+        reactable()
+    }
+    
   })
 
   output$powerPlot <- renderPlotly({
@@ -186,15 +195,17 @@ server <- function(input, output, session) {
       x <- N()
       xlab <- "Sample Size"
       title <- paste("Power Simulations for Effect =", input$es)
-    }
-    else{
+      df <-  results() %>% 
+        mutate(text = paste0("Sample size: ", x, "\nPower: ", powers)) 
+    } else {
       x <- es()
       xlab <- "Effect Size"
       title <- paste("Power Simulations for Sample Size =", input$ss)
+      df <-  results() %>% 
+        mutate(text = paste0("Effect size: ", x, "\nPower: ", powers)) 
     }
     
-    p <- results() %>% 
-      mutate(text = paste0("Sample size: ", x, "\nPower: ", powers)) %>%
+    p <- df %>%
       ggplot(aes(x = x, y = powers)) +
       geom_point(aes(text = text), colour=pal["blue"]) + 
       geom_line(colour=pal["blue"]) + 
@@ -207,7 +218,7 @@ server <- function(input, output, session) {
       labs(x=xlab, y="Power", title=title) +
       theme_minimal() 
     
-    plotly::ggplotly(p, tooltip="text", height = 600)
+    plotly::ggplotly(p, tooltip="text") %>% config(displayModeBar = F)
   })
 }
 
