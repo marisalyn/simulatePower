@@ -57,7 +57,7 @@ server <- function(input, output, session) {
   
   dfFull <- eventReactive(input$file, {       
     req(input$file)
-    df <- read.csv(input$file$datapath, header = header()) ## could update to allow for diff file formats 
+    df <- read.csv(input$file$datapath, header = header()) 
     shinyjs::enable(id="next1")
     vars <- names(df)
     
@@ -81,7 +81,6 @@ server <- function(input, output, session) {
   })
   
   # update picker inputs -----------------------------------------------------
-  
   observeEvent(input$predictorVars, {
     varsAvail <- setdiff(names(dfFull()), input$predictorVars)
     updatePickerInput(
@@ -114,18 +113,14 @@ server <- function(input, output, session) {
       shinyjs::disable("simulate")
     }
   })
-  
-  
+
+  # display data selected --------------------------------------------------
   df <- reactive({ 
     req(dfFull(), input$outcomeVar)
     subset(dfFull(), select = c(input$predictorVars, input$outcomeVar)) 
   })
   
-  
-  # display data selected --------------------------------------------------
-  
   output$dataTable <-  reactable::renderReactable({  reactable(df()) })
-  
   
   # get sample and effect size(s) -N----------------------------------------
   N <- reactive({
@@ -176,7 +171,7 @@ server <- function(input, output, session) {
   # show results ------------------------------------------------------------
   output$resultsTable <- reactable::renderReactable({
     req(length(results()) > 0)
-    if(input$ssOrEs == "Sample Size"){
+    if(isolate(input$ssOrEs) == "Sample Size"){
       results() %>%
         rename("Power" = "powers", "Sample size" = "N") %>%
         reactable()
@@ -190,16 +185,17 @@ server <- function(input, output, session) {
 
   output$powerPlot <- renderPlotly({
     req(length(results()) > 0 )
-    if(input$ssOrEs == "Sample Size"){
-      x <- N()
+    
+    if(isolate(input$ssOrEs) == "Sample Size"){
+      x <- isolate(N())
       xlab <- "Sample Size"
-      title <- paste("Power Simulations for Effect =", input$es)
+      title <- paste("Power Simulations for Effect =", isolate(input$es))
       df <-  results() %>% 
         mutate(text = paste0("Sample size: ", x, "\nPower: ", powers)) 
     } else {
-      x <- es()
+      x <- isolate(es())
       xlab <- "Effect Size"
-      title <- paste("Power Simulations for Sample Size =", input$ss)
+      title <- paste("Power Simulations for Sample Size =", isolate(input$ss2))
       df <-  results() %>% 
         mutate(text = paste0("Effect size: ", x, "\nPower: ", powers)) 
     }
