@@ -20,6 +20,11 @@ pal = c(
     "orange" = "#ff8500"
 )
 
+# TODO
+# disable elements
+# make lsit of variables reactive s.t. can't select same variable as predictor and outcome 
+# add temp text before sim run
+# move table below outputs 
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ##                  ui                       ##
@@ -244,19 +249,26 @@ server <- function(input, output, session) {
         c(input$predictorVars, input$outcomeVar)
     })
     
-    # get dataframe
     df <-  reactive({ 
         req(dfFull(), vars())
         subset(dfFull(), select = vars()) 
     })
     
-    # OUTPUT: datatable of uploaded data based on selected outcome and predictor vars
-    output$dataTable <-  DT::renderDataTable({ 
-        df()
+    # toggle next2 ------------------------------------------------------------
+    observeEvent(c(input$predictorVars, input$outcomeVar), {
+        if (length(input$predictorVars) >= 1 & length(input$outcomeVar) == 1) {
+            shinyjs::enable("next2")
+        } else{
+            shinyjs::disable("next2")
+        }
     })
     
+    # display data selected --------------------------------------------------
     
-    # SIMULATE 
+    output$dataTable <-  DT::renderDataTable({ df() })
+
+    # simulate ----------------------------------------------------------------
+    
     observeEvent(input$simulate, {
         # transform log outcome to logical
         logOut <- reactive({
@@ -264,7 +276,7 @@ server <- function(input, output, session) {
                 return(TRUE)
             FALSE
         })
-        
+        print("here")
         # get sample and effect size(s)
         if(input$ssOrEs == "Sample Size"){
             N <- reactive(seq(from = input$ssMin, to = input$ssMax, by = input$ssBy))
