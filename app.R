@@ -164,11 +164,7 @@ ui <- fluidPage(
                 tags$p(tags$strong("Enter number of repetitions to run per sample/effect size"), 
                        tags$br(), "(Value must be between 1 and 500)"),
                 numericInput(inputId = "sims", label = NULL, value = 100, min = 1, max = 500),
-                
-                tags$p(tags$strong("Enter seed value"), tags$br(), 
-                       "Remember your seed value if you wish to reproduce your results!"),
-                numericInput(inputId = "seed", label = NULL, value = 123),
-                
+
                 actionButton('next4', "Next", class = "btn btn-info btn-block")
             
             ), 
@@ -360,8 +356,7 @@ server <- function(input, output, session) {
                         N(), 
                         input$outcomeVar, 
                         input$predictorVars, 
-                        logOutcome = logOut, 
-                        input$seed
+                        logOutcome = logOut
                         )
             
         })
@@ -373,7 +368,6 @@ server <- function(input, output, session) {
     
     # show results ------------------------------------------------------------
     output$resultsTable <- DT::renderDataTable({ 
-        print(results())
         req(length(results()) > 0 )
         results() %>%
             datatable() %>%
