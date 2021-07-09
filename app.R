@@ -21,7 +21,6 @@ pal = c(
 )
 
 # TODO
-# disable elements
 # make lsit of variables reactive s.t. can't select same variable as predictor and outcome 
 # add temp text before sim run
 # move table below outputs 
@@ -75,7 +74,8 @@ ui <- fluidPage(
                 title = "Select Variables", 
                 
                 tags$p(tags$strong("Choose predictor variables you want to include in your model")),
-                selectizeInput(
+    
+                pickerInput(
                     inputId = "predictorVars", 
                     label = NULL,
                     choices = NULL, 
@@ -83,7 +83,7 @@ ui <- fluidPage(
                     ),
                 
                 tags$p(tags$strong("Choose the outcome variable you want in your model")),
-                selectizeInput(
+                pickerInput(
                     inputId = "outcomeVar", 
                     label = NULL,
                     choices = NULL,
@@ -248,28 +248,61 @@ server <- function(input, output, session) {
     })
     
     # grab data from file -----------------------------------------------------
-    header <- reactive({
-        updateSelectizeInput(session, "predictorVars","Select Predictor Variables", choices = c())
-        updateSelectizeInput(session, "outcomeVar","Select Outcome Variable", choices = c())
+    header <- eventReactive(input$header, {
+        updatePickerInput(
+            session = session,
+            inputId = "predictorVars", 
+            label = NULL,
+            choices = NULL
+        )
+        
+        updatePickerInput(
+            session = session,
+            inputId = "outcomeVar", 
+            label = NULL,
+            choices = NULL
+        )
+        
         if_else(input$header == "Yes", TRUE, FALSE)
     })
     
-    dfFull <- reactive({       
+    dfFull <- eventReactive(input$file, {       
         req(input$file)
         df <- read.csv(input$file$datapath, header = header()) ## could update to allow for diff file formats 
         shinyjs::enable(id="next1")
-        vars <- colnames(df)
-        updateSelectizeInput(session, "predictorVars","Select Predictor Variables", choices = vars)
-        updateSelectizeInput(session, "outcomeVar","Select Outcome Variable", choices = vars)
+        vars <- names(df)
+        
+        updatePickerInput(
+            session = session,
+            inputId = "predictorVars", 
+            label = NULL,
+            choices = vars, 
+            selected = NULL
+        )
+        
+        updatePickerInput(
+            session = session,
+            inputId = "outcomeVar", 
+            label = NULL,
+            choices = vars, 
+            selected = NULL
+        )
+        
         df
     })
-    
-    vars <- reactive({
-        req(input$file, input$predictorVars, input$outcomeVar)
-        c(input$predictorVars, input$outcomeVar)
-    })
-    
-    observeEvent(c(input$predictorVars, input$outcomeVar), {
+
+    observeEvent(c(input$predictorVars), {
+        selectedVars <- c(input$predictorVars, input$outcomeVar)
+        varsAvail <- setdiff(names(dfFull()), selectedVars)
+
+        updatePickerInput(
+            session = session,
+            inputId = "outcomeVar", 
+            label = NULL,
+            choices = varsAvail, 
+            selected = NULL
+        )
+        
         if (length(input$predictorVars) >= 1 & length(input$outcomeVar) == 1) {
             shinyjs::hide("helpTextSim")
             shinyjs::enable("simulate")
@@ -279,9 +312,9 @@ server <- function(input, output, session) {
         }
     })
     
-    df <-  reactive({ 
-        req(dfFull(), vars())
-        subset(dfFull(), select = vars()) 
+    df <- reactive({ 
+        req(dfFull(), input$predictorVars, input$outcomeVar)
+        subset(dfFull(), select = c(input$predictorVars, input$outcomeVar)) 
     })
     
 
