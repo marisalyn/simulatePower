@@ -41,7 +41,7 @@ ui <- fluidPage(
         success = pal["green"],
         info = pal["orange"],
         warning = pal["yellow"],
-        danger = pal["pink"],
+        danger = pal["pink"]
         ),
 
     # application title
@@ -49,8 +49,8 @@ ui <- fluidPage(
         titlePanel("Power Simulations"),
         
         tags$p("This application runs power simulations based data and parameters you input below. 
-                       The simulations are run using an OLS model. Before starting, make sure your dataset includes columns of
-                       any variable transformations you want to include in your model and save the dataset in CSV format."),
+               The simulations are run using an OLS model. Before starting, make sure your dataset includes columns of
+               any variable transformations you want to include in your model and save the dataset in CSV format."),
         
         sidebarPanel(bsCollapse(
             id = "mainCollapse",
@@ -59,10 +59,10 @@ ui <- fluidPage(
             bsCollapsePanel(
                 title = "Upload Data", 
                 
-                tags$p(tags$strong("Upload your cleaned data in csv format")),
+                tags$p("Upload your cleaned data in csv format"),
                 fileInput(inputId = "file", label = NULL, accept = c(".csv")),
                 
-                tags$p(tags$strong("Does the file have a header?")),
+                tags$p("Does the file have a header?"),
                 radioButtons(
                     inputId = "header", 
                     label = NULL, 
@@ -73,7 +73,7 @@ ui <- fluidPage(
             bsCollapsePanel(
                 title = "Select Variables", 
                 
-                tags$p(tags$strong("Choose the outcome variable you want in your model")),
+                tags$p("Choose the outcome variable you want in your model"),
                 pickerInput(
                     inputId = "outcomeVar", 
                     label = NULL,
@@ -81,17 +81,17 @@ ui <- fluidPage(
                     multiple = FALSE
                 ),  
                 
-                tags$p(tags$strong("Choose predictor variables you want to include in your model")),
+                tags$p("Choose predictor variables you want to include in your model"),
                 pickerInput(
                     inputId = "predictorVars", 
                     label = NULL,
                     choices = NULL, 
                     multiple = TRUE, 
-                    options = list('actions-box'= TRUE), 
+                    options = list('actions-box'= TRUE)
                     ),
                 
 
-                tags$p(tags$strong("Do you want the outcome variable to be log transformed?")),
+                tags$p("Do you want the outcome variable to be log transformed?"),
                 radioButtons(
                     inputId = "logOutcome", 
                     label = NULL, 
@@ -103,17 +103,18 @@ ui <- fluidPage(
             bsCollapsePanel(
                 title = "Select Sample and Effect Size", 
 
-                tags$p(tags$strong("Do you want to vary the sample size or effect size?")),
+                tags$p("Do you want to vary the sample size or effect size?"),
                 radioButtons(
                     inputId = "ssOrEs", 
                     label = NULL, 
-                    choices = c("Sample Size", "Effect Size")),
+                    choices = c("Sample Size", "Effect Size")
+                    ),
                 
                 # show if want to vary sample size 
                 # i.e. select multiple sample sizes and one effect size
                 conditionalPanel(
                     condition = "input.ssOrEs == 'Sample Size'",
-                    tags$p(tags$strong("Select a range of sample sizes")),
+                    tags$p("Select a range of sample sizes"),
                     sliderTextInput(
                         inputId = "ss",
                         label = NULL, 
@@ -121,9 +122,7 @@ ui <- fluidPage(
                         selected = c(10000, 100000)
                     ), 
                     
-                    tags$p(tags$strong("Select an effect size as a fraction of the 
-                                       difference in means"), tags$br(), 
-                           "(e.g. 0.05 = 5 percent difference in means)"),
+                    tags$p("Select an effect size as a fraction of the difference in means, e.g. 0.05 = 5 percent difference in means)"),
                     sliderTextInput(
                         inputId = "es",
                         label = NULL, 
@@ -136,8 +135,7 @@ ui <- fluidPage(
                 # i.e. select multiple effect sizes and one sample size
                 conditionalPanel(
                     condition = "input.ssOrEs == 'Effect Size'",
-                    tags$p(tags$strong("Select a range of effect sizes as a fraction of the difference in means"), tags$br(), 
-                           "(e.g. 0.05 = 5 percent difference in means)"),
+                    tags$p("Select a range of effect sizes as a fraction of the difference in means, (e.g. 0.05 = 5 percent difference in means)"),
                     sliderTextInput(
                         inputId = "es",
                         label = NULL, 
@@ -145,13 +143,13 @@ ui <- fluidPage(
                         selected = c(0.05, 0.15)
                     ), 
                     
-                    tags$p(tags$strong("Select a sample size")),
+                    tags$p("Select a sample size"),
                     sliderTextInput(
                         inputId = "es",
                         label = NULL, 
                         choices = seq(0, 1000000, by=1000), 
                         selected = 50000
-                    ), 
+                    )
                 ), 
                 actionButton('next3', "Next", class = "btn btn-info btn-block")
                 
@@ -159,11 +157,10 @@ ui <- fluidPage(
             bsCollapsePanel(
                 title = "Select Simulation Parameters", 
                 
-                tags$p(tags$strong("Select alpha value between 0.01 and 0.1 for significance level")),
+                tags$p("Select alpha value between 0.01 and 0.1 for significance level"),
                 numericInput(inputId = "alpha", label = NULL, value = 0.05, min = 0.01, max = 0.1),
                 
-                tags$p(tags$strong("Enter number of repetitions to run per sample/effect size"), 
-                       tags$br(), "(Value must be between 1 and 500)"),
+                tags$p("Enter number of repetitions to run per sample/effect size, (Value must be between 1 and 500)"),
                 numericInput(inputId = "sims", label = NULL, value = 100, min = 1, max = 500),
 
                 actionButton('next4', "Next", class = "btn btn-info btn-block")
@@ -178,8 +175,7 @@ ui <- fluidPage(
                 actionButton(inputId = "simulate", label = "Run Power Simulation")
             )
         )),
-                
-            
+
         mainPanel(
             column(8, 
                    tags$p(tags$h3("Estimated Statistical Power")),
