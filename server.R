@@ -145,9 +145,6 @@ server <- function(input, output, session) {
 
   # simulate ----------------------------------------------------------------
   results <- eventReactive(input$simulate, {
-    withProgress(
-      message = "Running Power Simulation", 
-      value = 0, {
         results <- simulatePower(
           df(),
           input$alpha, 
@@ -157,8 +154,7 @@ server <- function(input, output, session) {
           trtFrac=0.5,
           input$outcomeVar, 
           input$predictorVars
-        )
-    })
+          ) 
     
     shinyjs::hide("helpTextOuputs")
     

@@ -6,6 +6,7 @@ library(bslib)
 library(tidyverse)
 library(reactable)
 library(plotly)
+library(shinycssloaders)
 
 source("simulatePowerFunction.R")
 

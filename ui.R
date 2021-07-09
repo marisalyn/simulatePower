@@ -145,8 +145,10 @@ ui <- fluidPage(
                            id="helpTextOuputs", 
                            helpText("Select your inputs and hit the 'run simulation' button to view estimated power!")
                        ), 
-                       column(8, plotlyOutput("powerPlot", height = "auto")), 
-                       column(4, reactable::reactableOutput(outputId = "resultsTable"))
+                       column(8, plotlyOutput("powerPlot", height = "auto") %>% 
+                                  shinycssloaders::withSpinner(color=pal["orange"])), 
+                       column(4, reactable::reactableOutput(outputId = "resultsTable") %>% 
+                                  shinycssloaders::withSpinner(color=pal["orange"]))
                    )
                    ), 
             column(12, 
