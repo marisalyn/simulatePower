@@ -280,77 +280,87 @@ server <- function(input, output, session) {
     output$dataTable <-  DT::renderDataTable({ df() })
 
 
-    # simulate ----------------------------------------------------------------
-    observeEvent(input$simulate, {
-        logOut <- if_else(input$logOutcome == "Yes", TRUE, FALSE)
-        
-        # get sample and effect size(s)
+    # get sample and effect size(s) -N----------------------------------------
+    N <- reactive({
         if(input$ssOrEs == "Sample Size"){
             ss1 <- as.numeric(input$ss[1])
             ss2 <- as.numeric(input$ss[2])
-            N <- seq(from = ss1, to = ss2, by = (ss2-ss1)/10)
-            
-            es <- as.numeric(input$es)
+            seq(from = ss1, to = ss2, by = (ss2-ss1)/10)
+        } else {
+            as.numeric(input$ss)
         }
-        else{
-            N <- as.numeric(input$ss)
-            
+    })
+    
+    es <- reactive({
+        if(input$ssOrEs == "Sample Size"){
+            as.numeric(input$es)
+        } else {
             es1 <- as.numeric(input$es[1])
             es2 <- as.numeric(input$es[2])
-            es <- seq(from = es1, to = es2, by = (es2-es1)/10)
+            seq(from = es1, to = es2, by = (es2-es1)/10)
         }
-        
+    })
+    
+    
+    # simulate ----------------------------------------------------------------
+    results <- eventReactive(input$simulate, {
+        logOut <- if_else(input$logOutcome == "Yes", TRUE, FALSE)
+
         # simulate
         withProgress(message = "Running Power Simulation", value = 0, {
             results <- simulatePower(
                         df(),
                         input$alpha, 
                         input$sims, 
-                        es, 
-                        N, 
+                        es(), 
+                        N(), 
                         input$outcomeVar, 
                         input$predictorVars, 
                         logOutcome = logOut, 
                         input$seed
                         )
             
-            # OUPUT: build table of power results
-            output$resultsTable <-  DT::renderDataTable({ 
-                results %>%
-                    datatable() %>%
-                    formatRound(columns=colnames(results)[2], digits=3)
-            })
-            
-            # OUPUT: build plot of power results 
-            h3(textOutput("Power Plot"))
-            output$powerPlot <- renderPlotly({
-                if(input$ssOrEs == "Sample Size"){
-                    x <- N
-                    xlab <- "Sample Size"
-                    title <- paste("Power Simulations for Effect =", input$es)
-                }
-                else{
-                    x <- es
-                    xlab <- "Effect Size"
-                    title <- paste("Power Simulations for Sample Size =", input$ss)
-                }
-                p <- results %>% 
-                    mutate(text = paste0("Sample size: ", x, "\nPower: ", powers)) %>%
-                    ggplot(aes(x = x, y = powers)) +
-                    geom_point(aes(text = text), colour=pal["blue"]) + 
-                    geom_line(colour=pal["blue"]) + 
-                    theme(text = element_text(size=20))+
-                    geom_hline(
-                        yintercept = 0.8,
-                        colour = pal["orange"],
-                        linetype = "dashed",
-                        size = 1.2) +
-                    labs(x=xlab, y="Power", title=title) +
-                    theme_minimal() 
-               
-                plotly::ggplotly(p, tooltip="text")
-            })
         })
+        
+        results
+    })
+    
+    output$resultsTable <-  DT::renderDataTable({ 
+        results() %>%
+            datatable() %>%
+            formatRound(columns=colnames(results())[2], digits=3)
+    })
+    
+    
+    output$powerPlot <- renderPlotly({
+        validate(need(nrow(results()) > 0, "Select your inputs and hit the 'run simulation' button!"))
+        
+        if(input$ssOrEs == "Sample Size"){
+            x <- N()
+            xlab <- "Sample Size"
+            title <- paste("Power Simulations for Effect =", input$es)
+        }
+        else{
+            x <- es()
+            xlab <- "Effect Size"
+            title <- paste("Power Simulations for Sample Size =", input$ss)
+        }
+        
+        p <- results() %>% 
+            mutate(text = paste0("Sample size: ", x, "\nPower: ", powers)) %>%
+            ggplot(aes(x = x, y = powers)) +
+            geom_point(aes(text = text), colour=pal["blue"]) + 
+            geom_line(colour=pal["blue"]) + 
+            theme(text = element_text(size=20))+
+            geom_hline(
+                yintercept = 0.8,
+                colour = pal["orange"],
+                linetype = "dashed",
+                size = 1.2) +
+            labs(x=xlab, y="Power", title=title) +
+            theme_minimal() 
+        
+        plotly::ggplotly(p, tooltip="text")
     })
 }
 
