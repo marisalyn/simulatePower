@@ -41,21 +41,17 @@ ui <- fluidPage(
         ),
 
     # application title
+    column(width=10, offset=1, 
     titlePanel("Power Simulations"),
    
+    tags$p("This application runs power simulations based data and parameters you input below. 
+                   The simulations are run using an OLS model. Before starting, make sure your dataset includes columns of
+                   any variable transformations you want to include in your model and save the dataset in CSV format."),
+    
     sidebarPanel(bsCollapse(
         id = "collapse_main",
         multiple = TRUE,
-        open = c("Introduction"),
-        bsCollapsePanel(
-            title = "Introduction",
-            # DESCRIPTION OF APP 
-            # TODO: rephrase 
-            tags$p("This application runs power simulations based data and parameters you input below. 
-                   The simulations are run using an OLS model. Before starting, make sure your dataset includes columns of
-                   any variable transformations you want to include in your model and save the dataset in CSV format."),
-            actionButton('next0', "Next", class = "btn btn-info btn-block")
-        ), 
+        open = c("Upload Data"),
         bsCollapsePanel(
             title = "Upload Data", 
             
@@ -180,7 +176,7 @@ ui <- fluidPage(
         tags$p(tags$h3("Power Plot")),
         plotOutput("powerPlot")
     )
-)
+))
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ##                  server                   ##
@@ -188,14 +184,8 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {  # session is used to updateSelectInput
     
-    observeEvent(input$next0, {
-        updateCollapse(
-            session, id = "collapse_main", 
-            open = "Upload Data", 
-            close = "Introduction"
-            )
-    })
-    
+    shinyjs::disable(id="next1")
+
     observeEvent(input$next1, {
         updateCollapse(
             session, id = "collapse_main", 
@@ -240,8 +230,9 @@ server <- function(input, output, session) {  # session is used to updateSelectI
     
     datFull <- reactive({       
         inFile <- input$file
-        req(inFile, header)
+        req(inFile)
         df <- read.csv(inFile$datapath, header = header()) ## could update to allow for diff file formats 
+        shinyjs::enable(id="next1")
         vars <- colnames(df)
         updateSelectizeInput(session, "predictorVars","Select Predictor Variables", choices = vars)
         updateSelectizeInput(session, "outcomeVar","Select Outcome Variable", choices = vars)
