@@ -134,7 +134,7 @@ server <- function(input, output, session) {
       ss2 <- as.numeric(input$ss[2])
       seq(from = ss1, to = ss2, by = (ss2-ss1)/10)
     } else {
-      as.numeric(input$ss)
+      as.numeric(input$ss2)
     }
   })
   
@@ -142,8 +142,8 @@ server <- function(input, output, session) {
     if(input$ssOrEs == "Sample Size"){
       as.numeric(input$es)
     } else {
-      es1 <- as.numeric(input$es[1])
-      es2 <- as.numeric(input$es[2])
+      es1 <- as.numeric(input$es2[1])
+      es2 <- as.numeric(input$es2[2])
       seq(from = es1, to = es2, by = (es2-es1)/10)
     }
   })
@@ -181,9 +181,8 @@ server <- function(input, output, session) {
         rename("Power" = "powers", "Sample size" = "N") %>%
         reactable()
     } else{
-      print(results())
       results() %>%
-        rename("Power" = "powers", "Sample size" = "N") %>%
+        rename("Power" = "powers", "Effect size" = "effectSize") %>%
         reactable()
     }
     

@@ -106,7 +106,7 @@ ui <- fluidPage(
                     condition = "input.ssOrEs == 'Effect Size'",
                     tags$p("Select a range of effect sizes as a fraction of the difference in means, (e.g. 0.05 = 5 percent difference in means)"),
                     sliderTextInput(
-                        inputId = "es",
+                        inputId = "es2",
                         label = NULL, 
                         choices = seq(0.01, 0.5, by=0.01), 
                         selected = c(0.05, 0.15)
@@ -114,7 +114,7 @@ ui <- fluidPage(
                     
                     tags$p("Select a sample size"),
                     sliderTextInput(
-                        inputId = "es",
+                        inputId = "ss2",
                         label = NULL, 
                         choices = seq(1000, 1000000, by=1000), 
                         selected = 50000
