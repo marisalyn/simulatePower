@@ -21,5 +21,6 @@ pal = c(
 )
 
 #TODO:
-# trtFrac
 # intro text
+# add trtFrac option
+# add better loading
