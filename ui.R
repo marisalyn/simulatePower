@@ -58,15 +58,7 @@ ui <- fluidPage(
                     multiple = TRUE, 
                     options = list('actions-box'= TRUE)
                     ),
-                
 
-                tags$p("Do you want the outcome variable to be log transformed?"),
-                radioButtons(
-                    inputId = "logOutcome", 
-                    label = NULL, 
-                    choices = c("Yes", "No"), 
-                    selected = "No"
-                    ), 
                 actionButton('next2', "Next", class = "btn btn-info btn-block")
             ),  
             bsCollapsePanel(

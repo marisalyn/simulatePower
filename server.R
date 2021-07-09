@@ -145,9 +145,6 @@ server <- function(input, output, session) {
 
   # simulate ----------------------------------------------------------------
   results <- eventReactive(input$simulate, {
-    
-    logOut <- if_else(input$logOutcome == "Yes", TRUE, FALSE)
-    
     withProgress(
       message = "Running Power Simulation", 
       value = 0, {
@@ -158,8 +155,7 @@ server <- function(input, output, session) {
           es(), 
           N(), 
           input$outcomeVar, 
-          input$predictorVars, 
-          logOutcome = logOut
+          input$predictorVars
         )
     })
     

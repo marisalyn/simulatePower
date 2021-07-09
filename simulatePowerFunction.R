@@ -11,9 +11,6 @@
 #     provided in quotations, e.g. "waterUse" 
 #     [note: only one outcome variable is allowed]
 # predictors: the variables to include as predictor variables
-# logOutcome: logical for whether or not to take the log of the outcome variable
-#     [note: if input variables must be logged they must be provided in that
-#      format in the provided dataframe]
 
 ## outputs:
 # dataframe of tested effect/sample sizes and associated power
@@ -27,7 +24,6 @@ simulatePower <-
            N,
            outcome,
            predictors, 
-           logOutcome = FALSE, 
            seed = 123) {
     
     set.seed(seed)
@@ -65,12 +61,9 @@ simulatePower <-
                                 sampleDat[[outcome]]) # estimate effect size
           modelDat <- sampleDat %>% select(-c(outcome))
           modelDat$trt <- as.factor(modelDat$trt)
-          if(logOutcome == TRUE){
-            fit <- lm(log(y) ~ ., data = modelDat)
-          }
-          else{
-            fit <- lm(y ~ ., data = modelDat)
-          }
+          
+          fit <- lm(y ~ ., data = modelDat)
+          
           p <- summary(fit)$coefficients["trt1", 4]  # p-val of trt
           significantExperiments[i] <-
             (p <= alpha) # 1 if experiment has significant trt
@@ -103,12 +96,9 @@ simulatePower <-
                                 sampleDat[[outcome]]) # estimate effect size
           modelDat <- sampleDat %>% select(-c(outcome))
           modelDat$trt <- as.factor(modelDat$trt)
-          if(logOutcome == TRUE){
-            fit <- lm(log(y) ~ ., data = modelDat)
-          }
-          else{
-            fit <- lm(y ~ ., data = modelDat)
-          }
+          
+          fit <- lm(y ~ ., data = modelDat)
+          
           p <- summary(fit)$coefficients["trt1",4]     # p-val of trt
           significantExperiments[i] <- (p <= alpha) # 1 if experiment has significant trt
         }
