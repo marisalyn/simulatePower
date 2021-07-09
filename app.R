@@ -2,10 +2,10 @@ library(shiny)
 library(shinyWidgets)
 library(shinyBS)
 library(shinyjs)
-library(DT)
-library(dplyr)
 library(bslib)
-library(ggplot2)
+library(tidyverse)
+library(DT)
+library(plotly)
 
 source("simulatePowerFunction.R")
 
@@ -47,154 +47,155 @@ ui <- fluidPage(
 
     # application title
     column(width=10, offset=1, 
-    titlePanel("Power Simulations"),
-   
-    tags$p("This application runs power simulations based data and parameters you input below. 
-                   The simulations are run using an OLS model. Before starting, make sure your dataset includes columns of
-                   any variable transformations you want to include in your model and save the dataset in CSV format."),
-    
-    sidebarPanel(bsCollapse(
-        id = "collapse_main",
-        multiple = TRUE,
-        open = c("Upload Data"),
-        bsCollapsePanel(
-            title = "Upload Data", 
-            
-            tags$p(tags$strong("Upload your cleaned data in csv format")),
-            fileInput(inputId = "file", label = NULL, accept = c(".csv")),
-            
-            tags$p(tags$strong("Does the file have a header?")),
-            radioButtons(
-                inputId = "header", 
-                label = NULL, 
-                choices = c("Yes", "No")
-                ),
-            actionButton('next1', "Next", class = "btn btn-info btn-block")
-        ), 
-        bsCollapsePanel(
-            title = "Select Variables", 
-            
-            tags$p(tags$strong("Choose predictor variables you want to include in your model")),
-            selectizeInput(
-                inputId = "predictorVars", 
-                label = NULL,
-                choices = NULL, 
-                multiple = TRUE
-                ),
-            
-            tags$p(tags$strong("Choose the outcome variable you want in your model")),
-            selectizeInput(
-                inputId = "outcomeVar", 
-                label = NULL,
-                choices = NULL,
-                multiple = FALSE
-                ),  
-            
-            tags$p(tags$strong("Do you want the outcome variable to be log transformed?")),
-            radioButtons(
-                inputId = "logOutcome", 
-                label = NULL, 
-                choices = c("Yes", "No"), 
-                selected = "No"
-                ), 
-            actionButton('next2', "Next", class = "btn btn-info btn-block")
-        ), 
-        bsCollapsePanel(
-            title = "Select Sample and Effect Size", 
-
-            tags$p(tags$strong("Do you want to vary the sample size or effect size?")),
-            radioButtons(
-                inputId = "ssOrEs", 
-                label = NULL, 
-                choices = c("Sample Size", "Effect Size")),
-            
-            # show if want to vary sample size 
-            # i.e. select multiple sample sizes and one effect size
-            conditionalPanel(
-                condition = "input.ssOrEs == 'Sample Size'",
-                tags$p(tags$strong("Select a range of sample sizes")),
-                sliderTextInput(
-                    inputId = "ss",
-                    label = NULL, 
-                    choices = seq(0, 1000000, by=1000), 
-                    selected = c(10000, 100000)
-                ), 
+        titlePanel("Power Simulations"),
+        
+        tags$p("This application runs power simulations based data and parameters you input below. 
+                       The simulations are run using an OLS model. Before starting, make sure your dataset includes columns of
+                       any variable transformations you want to include in your model and save the dataset in CSV format."),
+        
+        sidebarPanel(bsCollapse(
+            id = "collapse_main",
+            multiple = TRUE,
+            open = c("Upload Data"),
+            bsCollapsePanel(
+                title = "Upload Data", 
                 
-                tags$p(tags$strong("Select an effect size as a fraction of the 
-                                   difference in means"), tags$br(), 
-                       "(e.g. 0.05 = 5 percent difference in means)"),
-                sliderTextInput(
-                    inputId = "es",
-                    label = NULL, 
-                    choices = seq(0.01, 0.5, by=0.01), 
-                    selected = 0.05
-                )
-            ),
-            
-            # show if want to vary effect size 
-            # i.e. select multiple effect sizes and one sample size
-            conditionalPanel(
-                condition = "input.ssOrEs == 'Effect Size'",
-                tags$p(tags$strong("Select a range of effect sizes as a fraction of the difference in means"), tags$br(), 
-                       "(e.g. 0.05 = 5 percent difference in means)"),
-                sliderTextInput(
-                    inputId = "es",
-                    label = NULL, 
-                    choices = seq(0.01, 0.5, by=0.01), 
-                    selected = c(0.05, 0.15)
-                ), 
+                tags$p(tags$strong("Upload your cleaned data in csv format")),
+                fileInput(inputId = "file", label = NULL, accept = c(".csv")),
                 
-                tags$p(tags$strong("Select a sample size")),
-                sliderTextInput(
-                    inputId = "es",
+                tags$p(tags$strong("Does the file have a header?")),
+                radioButtons(
+                    inputId = "header", 
                     label = NULL, 
-                    choices = seq(0, 1000000, by=1000), 
-                    selected = 50000
-                ), 
+                    choices = c("Yes", "No")
+                    ),
+                actionButton('next1', "Next", class = "btn btn-info btn-block")
             ), 
-            actionButton('next3', "Next", class = "btn btn-info btn-block")
+            bsCollapsePanel(
+                title = "Select Variables", 
+                
+                tags$p(tags$strong("Choose predictor variables you want to include in your model")),
+                selectizeInput(
+                    inputId = "predictorVars", 
+                    label = NULL,
+                    choices = NULL, 
+                    multiple = TRUE
+                    ),
+                
+                tags$p(tags$strong("Choose the outcome variable you want in your model")),
+                selectizeInput(
+                    inputId = "outcomeVar", 
+                    label = NULL,
+                    choices = NULL,
+                    multiple = FALSE
+                    ),  
+                
+                tags$p(tags$strong("Do you want the outcome variable to be log transformed?")),
+                radioButtons(
+                    inputId = "logOutcome", 
+                    label = NULL, 
+                    choices = c("Yes", "No"), 
+                    selected = "No"
+                    ), 
+                actionButton('next2', "Next", class = "btn btn-info btn-block")
+            ), 
+            bsCollapsePanel(
+                title = "Select Sample and Effect Size", 
+
+                tags$p(tags$strong("Do you want to vary the sample size or effect size?")),
+                radioButtons(
+                    inputId = "ssOrEs", 
+                    label = NULL, 
+                    choices = c("Sample Size", "Effect Size")),
+                
+                # show if want to vary sample size 
+                # i.e. select multiple sample sizes and one effect size
+                conditionalPanel(
+                    condition = "input.ssOrEs == 'Sample Size'",
+                    tags$p(tags$strong("Select a range of sample sizes")),
+                    sliderTextInput(
+                        inputId = "ss",
+                        label = NULL, 
+                        choices = seq(0, 1000000, by=1000), 
+                        selected = c(10000, 100000)
+                    ), 
+                    
+                    tags$p(tags$strong("Select an effect size as a fraction of the 
+                                       difference in means"), tags$br(), 
+                           "(e.g. 0.05 = 5 percent difference in means)"),
+                    sliderTextInput(
+                        inputId = "es",
+                        label = NULL, 
+                        choices = seq(0.01, 0.5, by=0.01), 
+                        selected = 0.05
+                    )
+                ),
+                
+                # show if want to vary effect size 
+                # i.e. select multiple effect sizes and one sample size
+                conditionalPanel(
+                    condition = "input.ssOrEs == 'Effect Size'",
+                    tags$p(tags$strong("Select a range of effect sizes as a fraction of the difference in means"), tags$br(), 
+                           "(e.g. 0.05 = 5 percent difference in means)"),
+                    sliderTextInput(
+                        inputId = "es",
+                        label = NULL, 
+                        choices = seq(0.01, 0.5, by=0.01), 
+                        selected = c(0.05, 0.15)
+                    ), 
+                    
+                    tags$p(tags$strong("Select a sample size")),
+                    sliderTextInput(
+                        inputId = "es",
+                        label = NULL, 
+                        choices = seq(0, 1000000, by=1000), 
+                        selected = 50000
+                    ), 
+                ), 
+                actionButton('next3', "Next", class = "btn btn-info btn-block")
+                
+            ), 
+            bsCollapsePanel(
+                title = "Select Simulation Parameters", 
+                
+                tags$p(tags$strong("Select alpha value between 0.01 and 0.1 for significance level")),
+                numericInput(inputId = "alpha", label = NULL, value = 0.05, min = 0.01, max = 0.1),
+                
+                tags$p(tags$strong("Enter number of repetitions to run per sample/effect size"), 
+                       tags$br(), "(Value must be between 1 and 500)"),
+                numericInput(inputId = "sims", label = NULL, value = 100, min = 1, max = 500),
+                
+                tags$p(tags$strong("Enter seed value"), tags$br(), 
+                       "Remember your seed value if you wish to reproduce your results!"),
+                numericInput(inputId = "seed", label = NULL, value = 123),
+                
+                actionButton('next4', "Next", class = "btn btn-info btn-block")
             
-        ), 
-        bsCollapsePanel(
-            title = "Select Simulation Parameters", 
+            ), 
+            bsCollapsePanel(
+                title = "Run Simulation", 
+                
+                actionButton(inputId = "simulate", label = "Run Power Simulation")
+            )
+        )),
+                
             
-            tags$p(tags$strong("Select alpha value between 0.01 and 0.1 for significance level")),
-            numericInput(inputId = "alpha", label = NULL, value = 0.05, min = 0.01, max = 0.1),
+        mainPanel(
             
-            tags$p(tags$strong("Enter number of repetitions to run per sample/effect size"), 
-                   tags$br(), "(Value must be between 1 and 500)"),
-            numericInput(inputId = "sims", label = NULL, value = 100, min = 1, max = 500),
+            # table of data
+            tags$p(tags$h3("Selected Data")),
+            DT::dataTableOutput(outputId = "dataTable"),
             
-            tags$p(tags$strong("Enter seed value"), tags$br(), 
-                   "Remember your seed value if you wish to reproduce your results!"),
-            numericInput(inputId = "seed", label = NULL, value = 123),
+            # table of power results
+            tags$p(tags$h3("Power Results")),
+            DT::dataTableOutput(outputId = "resultsTable"),
             
-            actionButton('next4', "Next", class = "btn btn-info btn-block")
-        
-        ), 
-        bsCollapsePanel(
-            title = "Run Simulation", 
-            
-            actionButton(inputId = "simulate", label = "Run Power Simulation")
+            # plot power results
+            tags$p(tags$h3("Power Plot")),
+            plotlyOutput("powerPlot")
         )
-    )),
-            
-        
-    mainPanel(
-        
-        # table of data
-        tags$p(tags$h3("Selected Data")),
-        DT::dataTableOutput(outputId = "dataTable"),
-        
-        # table of power results
-        tags$p(tags$h3("Power Results")),
-        DT::dataTableOutput(outputId = "resultsTable"),
-        
-        # plot power results
-        tags$p(tags$h3("Power Plot")),
-        plotOutput("powerPlot")
     )
-))
+)
 
 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
 ##                  server                   ##
@@ -322,7 +323,7 @@ server <- function(input, output, session) {
             
             # OUPUT: build plot of power results 
             h3(textOutput("Power Plot"))
-            output$powerPlot <- renderPlot({
+            output$powerPlot <- renderPlotly({
                 if(input$ssOrEs == "Sample Size"){
                     x <- N
                     xlab <- "Sample Size"
@@ -333,16 +334,21 @@ server <- function(input, output, session) {
                     xlab <- "Effect Size"
                     title <- paste("Power Simulations for Sample Size =", input$ss)
                 }
-                ggplot(results, aes(x = x, y = powers)) +
-                    geom_point() + geom_smooth() +
+                p <- results %>% 
+                    mutate(text = paste0("Sample size: ", x, "\nPower: ", powers)) %>%
+                    ggplot(aes(x = x, y = powers)) +
+                    geom_point(aes(text = text), colour=pal["blue"]) + 
+                    geom_line(colour=pal["blue"]) + 
                     theme(text = element_text(size=20))+
-                    geom_hline(yintercept = 0.8,
-                               colour = "#8b1c3f",
-                               linetype = "dashed",
-                               size = 2) +
-                    xlab(xlab)  +
-                    ylab("Power") +
-                    ggtitle(title)
+                    geom_hline(
+                        yintercept = 0.8,
+                        colour = pal["orange"],
+                        linetype = "dashed",
+                        size = 1.2) +
+                    labs(x=xlab, y="Power", title=title) +
+                    theme_minimal() 
+               
+                plotly::ggplotly(p, tooltip="text")
             })
         })
     })
