@@ -181,18 +181,23 @@ ui <- fluidPage(
                 
             
         mainPanel(
-            
-            # table of data
-            tags$p(tags$h3("Selected Data")),
-            DT::dataTableOutput(outputId = "dataTable"),
-            
-            # table of power results
-            tags$p(tags$h3("Power Results")),
-            DT::dataTableOutput(outputId = "resultsTable"),
-            
-            # plot power results
-            tags$p(tags$h3("Power Plot")),
-            plotlyOutput("powerPlot")
+            column(8, 
+                   tags$p(tags$h3("Estimated Statistical Power")),
+                   plotlyOutput("powerPlot", height = "10px")
+                   ), 
+            column(4, 
+                   DT::dataTableOutput(outputId = "resultsTable")
+                   ), 
+            column(12, 
+                   tags$div(
+                       id="helpText", 
+                       helpText("Select your inputs and hit the 'run simulation' button to view estimated power!"))
+                   ), 
+            column(12, 
+                   tags$p(tags$h3("Selected Data")),
+                   DT::dataTableOutput(outputId = "dataTable")
+                   )
+
         )
     )
 )
@@ -304,6 +309,9 @@ server <- function(input, output, session) {
     
     # simulate ----------------------------------------------------------------
     results <- eventReactive(input$simulate, {
+        
+        "Select your inputs and hit the 'run simulation' button!"
+        
         logOut <- if_else(input$logOutcome == "Yes", TRUE, FALSE)
 
         # simulate
@@ -322,9 +330,11 @@ server <- function(input, output, session) {
             
         })
         
+        shinyjs::hide("helpText")
         results
     })
     
+    # show results ------------------------------------------------------------
     output$resultsTable <-  DT::renderDataTable({ 
         results() %>%
             datatable() %>%
@@ -333,8 +343,7 @@ server <- function(input, output, session) {
     
     
     output$powerPlot <- renderPlotly({
-        validate(need(nrow(results()) > 0, "Select your inputs and hit the 'run simulation' button!"))
-        
+
         if(input$ssOrEs == "Sample Size"){
             x <- N()
             xlab <- "Sample Size"
@@ -360,7 +369,8 @@ server <- function(input, output, session) {
             labs(x=xlab, y="Power", title=title) +
             theme_minimal() 
         
-        plotly::ggplotly(p, tooltip="text")
+        plotly::ggplotly(p, tooltip="text") %>% 
+            plotly::layout(height = "auto")
     })
 }
 
