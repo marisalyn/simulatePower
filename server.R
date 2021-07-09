@@ -105,7 +105,7 @@ server <- function(input, output, session) {
   })
   
   observeEvent(c(input$predictorVars, input$outcomeVar), {
-    if (length(input$predictorVars) >= 1 & length(input$outcomeVar) == 1) {
+    if (length(input$outcomeVar) == 1) {
       shinyjs::hide("helpTextSim")
       shinyjs::enable("simulate")
     } else{

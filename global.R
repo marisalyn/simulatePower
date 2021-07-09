@@ -24,4 +24,3 @@ pal = c(
 #TODO:
 # intro text
 # add trtFrac option
-# add better loading
