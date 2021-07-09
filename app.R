@@ -112,32 +112,45 @@ ui <- fluidPage(
             # i.e. select multiple sample sizes and one effect size
             conditionalPanel(
                 condition = "input.ssOrEs == 'Sample Size'",
-                tags$p(tags$strong("Enter values between 1 and 1,000,000 to create a range of sample sizes to test")),
-                numericInput(inputId = "ssMin", label = "Min", value = NULL, min = 1, max = 1000000),
-                numericInput(inputId = "ssMax", label = "Max", value = NULL, min = 1, max = 1000000),
-                numericInput(inputId = "ssBy", label = "By", value = NULL, min = 1, max = 1000000),
+                tags$p(tags$strong("Select a range of sample sizes")),
+                sliderTextInput(
+                    inputId = "ss",
+                    label = NULL, 
+                    choices = seq(0, 1000000, by=1000), 
+                    selected = c(10000, 100000)
+                ), 
                 
-                tags$p(tags$strong("Input an effect size between 0.001 and 1.00 as a fraction of the 
+                tags$p(tags$strong("Select an effect size as a fraction of the 
                                    difference in means"), tags$br(), 
                        "(e.g. 0.05 = 5 percent difference in means)"),
-                numericInput(inputId = "es", label = NULL, 
-                             value = NULL, min = 0.001, max = 1.0)
+                sliderTextInput(
+                    inputId = "es",
+                    label = NULL, 
+                    choices = seq(0.01, 0.5, by=0.01), 
+                    selected = 0.05
+                )
             ),
             
             # show if want to vary effect size 
             # i.e. select multiple effect sizes and one sample size
             conditionalPanel(
                 condition = "input.ssOrEs == 'Effect Size'",
-                tags$p(tags$strong("Enter values between 0.001 and 1.00 to create a range of effect sizes 
-                                   as a fraction of the difference in means"), tags$br(), 
+                tags$p(tags$strong("Select a range of effect sizes as a fraction of the difference in means"), tags$br(), 
                        "(e.g. 0.05 = 5 percent difference in means)"),
-                numericInput(inputId = "esMin", label = "Min", value = NULL, min = 0.001, max = 1.0),
-                numericInput(inputId = "esMax", label = "Max", value = NULL, min = 0.001, max = 1.0),
-                numericInput(inputId = "esBy", label = "By", value = NULL,min = 0.001, max = 1.0),
+                sliderTextInput(
+                    inputId = "es",
+                    label = NULL, 
+                    choices = seq(0.01, 0.5, by=0.01), 
+                    selected = c(0.05, 0.15)
+                ), 
                 
-                tags$p(tags$strong("Input a sample size between 1 and 1,000,000")),
-                numericInput(inputId = "ss", label = NULL, 
-                             value = NULL,min = 1, max = 1000000)
+                tags$p(tags$strong("Select a sample size")),
+                sliderTextInput(
+                    inputId = "es",
+                    label = NULL, 
+                    choices = seq(0, 1000000, by=1000), 
+                    selected = 50000
+                ), 
             ), 
             actionButton('next3', "Next", class = "btn btn-info btn-block")
             
@@ -192,8 +205,6 @@ server <- function(input, output, session) {
     # set up next buttons -----------------------------------------------------
     shinyjs::disable(id="next1")
     shinyjs::disable(id="next2")
-    shinyjs::disable(id="next3")
-    shinyjs::disable(id="next4")
     
     observeEvent(input$next1, {
         updateCollapse(
@@ -249,12 +260,6 @@ server <- function(input, output, session) {
         c(input$predictorVars, input$outcomeVar)
     })
     
-    df <-  reactive({ 
-        req(dfFull(), vars())
-        subset(dfFull(), select = vars()) 
-    })
-    
-    # toggle next2 ------------------------------------------------------------
     observeEvent(c(input$predictorVars, input$outcomeVar), {
         if (length(input$predictorVars) >= 1 & length(input$outcomeVar) == 1) {
             shinyjs::enable("next2")
@@ -263,31 +268,36 @@ server <- function(input, output, session) {
         }
     })
     
+    df <-  reactive({ 
+        req(dfFull(), vars())
+        subset(dfFull(), select = vars()) 
+    })
+    
+
     # display data selected --------------------------------------------------
     
     output$dataTable <-  DT::renderDataTable({ df() })
 
+
     # simulate ----------------------------------------------------------------
-    
     observeEvent(input$simulate, {
-        # transform log outcome to logical
-        logOut <- reactive({
-            if(input$logOutcome == "Yes")
-                return(TRUE)
-            FALSE
-        })
-        print("here")
+        logOut <- if_else(input$logOutcome == "Yes", TRUE, FALSE)
+        
         # get sample and effect size(s)
         if(input$ssOrEs == "Sample Size"){
-            N <- reactive(seq(from = input$ssMin, to = input$ssMax, by = input$ssBy))
-            es <- reactive(input$es)
+            ss1 <- as.numeric(input$ss[1])
+            ss2 <- as.numeric(input$ss[2])
+            N <- seq(from = ss1, to = ss2, by = (ss2-ss1)/10)
+            
+            es <- as.numeric(input$es)
         }
         else{
-            N <- reactive(input$ss)
-            es <- reactive(seq(from = input$esMin, to = input$esMax, by = input$esBy))
+            N <- as.numeric(input$ss)
+            
+            es1 <- as.numeric(input$es[1])
+            es2 <- as.numeric(input$es[2])
+            es <- seq(from = es1, to = es2, by = (es2-es1)/10)
         }
-        
-        df <- df()
         
         # simulate
         withProgress(message = "Running Power Simulation", value = 0, {
@@ -295,11 +305,11 @@ server <- function(input, output, session) {
                         df(),
                         input$alpha, 
                         input$sims, 
-                        es(), 
-                        N(), 
+                        es, 
+                        N, 
                         input$outcomeVar, 
                         input$predictorVars, 
-                        logOutcome = logOut(), 
+                        logOutcome = logOut, 
                         input$seed
                         )
             
@@ -314,12 +324,12 @@ server <- function(input, output, session) {
             h3(textOutput("Power Plot"))
             output$powerPlot <- renderPlot({
                 if(input$ssOrEs == "Sample Size"){
-                    x <- N()
+                    x <- N
                     xlab <- "Sample Size"
                     title <- paste("Power Simulations for Effect =", input$es)
                 }
                 else{
-                    x <- es()
+                    x <- es
                     xlab <- "Effect Size"
                     title <- paste("Power Simulations for Sample Size =", input$ss)
                 }
