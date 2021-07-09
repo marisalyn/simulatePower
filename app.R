@@ -79,7 +79,8 @@ ui <- fluidPage(
                     inputId = "predictorVars", 
                     label = NULL,
                     choices = NULL, 
-                    multiple = TRUE
+                    multiple = TRUE, 
+                    options = list('actions-box'= TRUE), 
                     ),
                 
                 tags$p(tags$strong("Choose the outcome variable you want in your model")),
@@ -287,18 +288,33 @@ server <- function(input, output, session) {
         df
     })
 
-    observeEvent(c(input$predictorVars), {
-        selectedVars <- c(input$predictorVars, input$outcomeVar)
-        varsAvail <- setdiff(names(dfFull()), selectedVars)
-
+    observeEvent(input$predictorVars, {
+        print("here")
+        varsAvail <- setdiff(names(dfFull()), input$predictorVars)
+        print(varsAvail)
+        print(input$predictorVars)
         updatePickerInput(
             session = session,
             inputId = "outcomeVar", 
             label = NULL,
-            choices = varsAvail, 
-            selected = NULL
+            choices = varsAvail
         )
+    }, ignoreNULL = FALSE)
+    
+    observeEvent(input$outcomeVar, {
+        varsAvail <- setdiff(names(dfFull()), input$outcomeVar)
+        selected <- setdiff(input$predictorVars, input$outcomeVar)
         
+        updatePickerInput(
+            session = session,
+            inputId = "predictorVars", 
+            label = NULL,
+            choices = varsAvail, 
+            selected = selected
+        )
+    })
+    
+    observeEvent(c(input$predictorVars, input$outcomeVar), {
         if (length(input$predictorVars) >= 1 & length(input$outcomeVar) == 1) {
             shinyjs::hide("helpTextSim")
             shinyjs::enable("simulate")
@@ -307,9 +323,10 @@ server <- function(input, output, session) {
             shinyjs::disable("simulate")
         }
     })
+
     
     df <- reactive({ 
-        req(dfFull(), input$predictorVars, input$outcomeVar)
+        req(dfFull(), input$outcomeVar)
         subset(dfFull(), select = c(input$predictorVars, input$outcomeVar)) 
     })
     
