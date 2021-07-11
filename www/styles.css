@@ -14,7 +14,7 @@ h1, h2, h3, h4, h5, h6 {
   min-height: 20px;
   padding: 5px;
   margin-bottom: 0px;
-  background-color: #bc84cb88;
+  background-color: #ffffff;
   border: 0px solid #bc84cb;
 }
 
@@ -37,13 +37,13 @@ h1, h2, h3, h4, h5, h6 {
 
 #textCollapse > .panel-default {
     background-color: #ffffff;
-    border: 2px solid #ff8500;
+    border: 2px solid #bc84cb;
     border-radius: 0px;
 }
 
 #textCollapse >.panel-default>.panel-heading {
   color: #ffffff;
-  background-color: #ff8500;
-  border: 2px solid #ff8500;
+  background-color: #bc84cb;
+  border: 2px solid #bc84cb;
     border-radius: 0px;
 }

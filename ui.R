@@ -16,6 +16,7 @@ ui <- fluidPage(
     column(width=10, offset=1, 
         titlePanel("Simulating power"),
         tags$h5(
+            style = "color: #ff8500; margin:margin:5px 15px 0px 15px",
             "
             This application uses simulations based on user-uploaded data 
             to estimate statistical power for randomized controlled trials (RCTs) 
@@ -30,17 +31,53 @@ ui <- fluidPage(
             open = c("Upload Data"),
             bsCollapsePanel(
                 title = "Upload Data", 
-                tags$p("Upload your cleaned data in csv format"),
-                fileInput(inputId = "file", label = NULL, accept = c(".csv")),
-                
-                tags$p("Does the file have a header?"),
-                radioButtons(
-                    inputId = "header", 
-                    label = NULL, 
-                    choices = c("Yes", "No")
-                    ),
-                actionButton('next1', "Next", class = "btn btn-info btn-block")
-            ), 
+                materialSwitch(
+                    inputId = "useSampleData",
+                    label = "Use example data?", 
+                    value = FALSE,
+                    status = "primary"
+                ),
+                conditionalPanel(
+                    condition = "input.useSampleData",
+                    tags$h5("Sample data loaded!"), 
+                    tags$hr(), 
+                    tags$p(
+                        "The sample data for this app is from Capital Bikeshare via", 
+                        tags$a(href = "https://github.com/MicrosoftDocs/ml-basics", "Microsoft's Azure ml-basics repo"), 
+                        ". The data includes the following variables:",
+                        tags$ul(
+                            tags$li("dteday: date on which the data was observed"), 
+                            tags$li("season: a categorical variable indicating season (1:spring, 2:summer, 3:fall, 4:winter)"), 
+                            tags$li("yr: the year the observation was made (year 0:2011, and year 1:2012)"), 
+                            tags$li("month: the month the observation was made (1:January ... 12:December)"), 
+                            tags$li("holiday: a binary indicator if the day was a public holiday"), 
+                            tags$li("weekday: the day of week of the observation (0:Sunday ... 6:Saturday)"), 
+                            tags$li("workingday: a bindary indicator indicating if the day was a weekend/holiday or a working day"), 
+                            tags$li("weathersit: a categorical variable for the weather situation (1:clear, 2:mist/cloud, 3:light rain/snow, 4:heavy rain/hail/snow/fog)"), 
+                            tags$li("temp: the temperature in Celsius (normalized)"), 
+                            tags$li("atemp: the apparent temperature in Celsius (normalized)"), 
+                            tags$li("hum: normalized humidity"), 
+                            tags$li("windspeed: normalized windspeed"), 
+                            tags$li("rentals: the number of Capital Bikeshare rentals"), 
+                        )
+                    )
+                ), 
+                conditionalPanel(
+                    condition = "! input.useSampleData",
+                    
+                        tags$p("Upload your cleaned data in csv format"),
+                        fileInput(inputId = "file", label = NULL, accept = c(".csv")),
+                        
+                        tags$p("Does the file have a header?"),
+                        radioButtons(
+                            inputId = "header", 
+                            label = NULL, 
+                            choices = c("Yes", "No")
+                        ),
+                        actionButton('next1', "Next", class = "btn btn-info btn-block")
+                    ) 
+                ), 
+
             bsCollapsePanel(
                 title = "Select Variables", 
                 
@@ -52,7 +89,7 @@ ui <- fluidPage(
                     multiple = FALSE
                 ),  
                 
-                tags$p("Choose predictor variables you want to include in your model"),
+                tags$p("Choose any predictor variables you want to include in your model"),
                 pickerInput(
                     inputId = "predictorVars", 
                     label = NULL,

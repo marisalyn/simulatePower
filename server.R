@@ -55,31 +55,49 @@ server <- function(input, output, session) {
     if_else(input$header == "Yes", TRUE, FALSE)
   })
   
-  dfFull <- eventReactive(input$file, {       
-    req(input$file)
-    df <- read.csv(input$file$datapath, header = header()) 
-    shinyjs::enable(id="next1")
-    vars <- names(df)
-    
-    updatePickerInput(
-      session = session,
-      inputId = "predictorVars", 
-      label = NULL,
-      choices = vars, 
-      selected = NULL
-    )
-    
-    updatePickerInput(
-      session = session,
-      inputId = "outcomeVar", 
-      label = NULL,
-      choices = vars, 
-      selected = NULL
-    )
+  dfFull <- eventReactive(c(input$useSampleData, input$file),  {
+    if (input$useSampleData){
+      df <- read.csv("./data/daily-bike-share.csv", header = TRUE) 
+      vars <- names(df)
+      updatePickerInput(
+        session = session,
+        inputId = "predictorVars", 
+        label = NULL,
+        choices = vars, 
+        selected = NULL
+      )
+      
+      updatePickerInput(
+        session = session,
+        inputId = "outcomeVar", 
+        label = NULL,
+        choices = vars, 
+        selected = NULL
+      )
+    } else {
+      req(input$file)
+      df <- read.csv(input$file$datapath, header = header()) 
+      vars <- names(df)
+      updatePickerInput(
+        session = session,
+        inputId = "predictorVars", 
+        label = NULL,
+        choices = vars, 
+        selected = NULL
+      )
+      
+      updatePickerInput(
+        session = session,
+        inputId = "outcomeVar", 
+        label = NULL,
+        choices = vars, 
+        selected = NULL
+      )
+    }
     
     df
   })
-  
+
   # update picker inputs -----------------------------------------------------
   observeEvent(input$predictorVars, {
     varsAvail <- setdiff(names(dfFull()), input$predictorVars)
