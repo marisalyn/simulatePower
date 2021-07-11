@@ -13,13 +13,16 @@ ui <- fluidPage(
         danger = pal["pink"]
         ),
 
-    # application title
     column(width=10, offset=1, 
-        titlePanel("Power Simulations"),
-        
-        tags$p("This application runs power simulations based data and parameters you input below. 
-               The simulations are run using an OLS model. Before starting, make sure your dataset includes columns of
-               any variable transformations you want to include in your model and save the dataset in CSV format."),
+        titlePanel("Simulating power"),
+        tags$h5(
+            "
+            This application uses simulations based on user-uploaded data 
+            to estimate statistical power for randomized controlled trials (RCTs) 
+            that will be analyzed using an OLS regression.
+            "
+        ), 
+        introPanels, 
         
         sidebarPanel(bsCollapse(
             id = "mainCollapse",
@@ -27,7 +30,6 @@ ui <- fluidPage(
             open = c("Upload Data"),
             bsCollapsePanel(
                 title = "Upload Data", 
-                
                 tags$p("Upload your cleaned data in csv format"),
                 fileInput(inputId = "file", label = NULL, accept = c(".csv")),
                 
@@ -62,8 +64,18 @@ ui <- fluidPage(
                 actionButton('next2', "Next", class = "btn btn-info btn-block")
             ),  
             bsCollapsePanel(
-                title = "Select Sample and Effect Size", 
+                title = "Select Experiment Parameters", 
+                
+                tags$p("Select the probability that each unit will be assigned to treatment"),
+                sliderTextInput(
+                    inputId = "trtFrac",
+                    label = NULL, 
+                    choices = seq(0,1,0.01), 
+                    selected = c(0.5)
+                ), 
 
+                tags$hr(), 
+                
                 tags$p("Do you want to vary the sample size or effect size?"),
                 radioButtons(
                     inputId = "ssOrEs", 
@@ -75,20 +87,22 @@ ui <- fluidPage(
                 # i.e. select multiple sample sizes and one effect size
                 conditionalPanel(
                     condition = "input.ssOrEs == 'Sample Size'",
-                    tags$p("Select a range of sample sizes"),
-                    sliderTextInput(
+                    tags$p("Enter a range of sample sizes"),
+                    numericRangeInput(
                         inputId = "ss",
                         label = NULL, 
-                        choices = seq(1000, 1000000, by=1000), 
-                        selected = c(10000, 50000)
+                        value = c(10000, 50000), 
+                        separator = " - "
                     ), 
                     
-                    tags$p("Select an effect size as a fraction of the difference in means, e.g. 0.05 = 5 percent difference in means)"),
-                    sliderTextInput(
+                    tags$p("Select an effect size as a fraction of the difference 
+                           in means between the treatment and control group, 
+                           e.g. 0.05 implies the treatment group is an average  
+                           of 5 percent higher than the control group"),
+                    numericInput(
                         inputId = "es",
                         label = NULL, 
-                        choices = seq(0.01, 0.5, by=0.01), 
-                        selected = 0.02
+                        value = 0.02
                     )
                 ),
 
@@ -96,20 +110,23 @@ ui <- fluidPage(
                 # i.e. select multiple effect sizes and one sample size
                 conditionalPanel(
                     condition = "input.ssOrEs == 'Effect Size'",
-                    tags$p("Select a range of effect sizes as a fraction of the difference in means, (e.g. 0.05 = 5 percent difference in means)"),
-                    sliderTextInput(
+                    tags$p("Enter a range of effect sizes as a fraction of the 
+                           difference in means between the treatment and control group, 
+                           e.g. 0.05 implies the treatment group is an average  
+                           of 5 percent higher than the control group"),
+                    numericRangeInput(
                         inputId = "es2",
                         label = NULL, 
-                        choices = seq(0.01, 0.5, by=0.01), 
-                        selected = c(0.05, 0.15)
+                        value = c(0.01, 0.15), 
+                        separator = " - "
                     ), 
                     
                     tags$p("Select a sample size"),
-                    sliderTextInput(
+                    numericInput(
                         inputId = "ss2",
                         label = NULL, 
-                        choices = seq(1000, 1000000, by=1000), 
-                        selected = 50000
+                        min = 0, 
+                        value = 1000
                     )
                 ), 
                 actionButton('next3', "Next", class = "btn btn-info btn-block")

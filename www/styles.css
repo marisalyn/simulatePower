@@ -15,23 +15,35 @@ h1, h2, h3, h4, h5, h6 {
   padding: 5px;
   margin-bottom: 0px;
   background-color: #bc84cb88;
-  border: 1px solid #bc84cb;
-  border-radius: 4px;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
-  box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+  border: 0px solid #bc84cb;
 }
 
 .panel-default {
     background-color: #ffffff;
-    border: 1px solid #da7fc7;
+    border: 2px solid #da7fc7;
+    border-radius: 0px;
 }
 
 .panel-default>.panel-heading {
     color: #ffffff;
     background-color: #da7fc7;
-    border: 1px solid #da7fc7;
+    border: 2px solid #da7fc7;
+    border-radius: 0px;
 }
 
 #outputs {
   height: auto;
+}
+
+#textCollapse > .panel-default {
+    background-color: #ffffff;
+    border: 2px solid #ff8500;
+    border-radius: 0px;
+}
+
+#textCollapse >.panel-default>.panel-heading {
+  color: #ffffff;
+  background-color: #ff8500;
+  border: 2px solid #ff8500;
+    border-radius: 0px;
 }

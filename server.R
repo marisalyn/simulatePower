@@ -15,7 +15,7 @@ server <- function(input, output, session) {
   observeEvent(input$next2, {
     updateCollapse(
       session, id = "mainCollapse", 
-      open = "Select Sample and Effect Size", 
+      open = "Select Experiment Parameters", 
       close = "Select Variables"
     )
   })
@@ -24,7 +24,7 @@ server <- function(input, output, session) {
     updateCollapse(
       session, id = "mainCollapse",
       open = "Select Simulation Parameters", 
-      close = "Select Sample and Effect Size"
+      close = "Select Experiment Parameters"
     )
   })
   
@@ -145,20 +145,30 @@ server <- function(input, output, session) {
 
   # simulate ----------------------------------------------------------------
   results <- eventReactive(input$simulate, {
-        results <- simulatePower(
-          df(),
-          input$alpha, 
-          input$sims, 
-          es(), 
-          N(), 
-          trtFrac=0.5,
-          input$outcomeVar, 
-          input$predictorVars
-          ) 
-    
-    shinyjs::hide("helpTextOuputs")
-    
-    results
+    if (! all(N() > 0 )) {
+      sendSweetAlert(
+        session = session,
+        title = "Error!",
+        text = "Sample size input is negative! Please pick a positive sample size.",
+        type = "error"
+      )
+    } else {
+      results <- simulatePower(
+        df(),
+        input$alpha, 
+        input$sims, 
+        es(), 
+        N(), 
+        trtFrac=0.5,
+        input$outcomeVar, 
+        input$predictorVars
+      ) 
+      
+      shinyjs::hide("helpTextOuputs")
+      
+      results
+    }
+
   })
   
   # show results ------------------------------------------------------------

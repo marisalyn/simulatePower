@@ -8,7 +8,8 @@ library(reactable)
 library(plotly)
 library(shinycssloaders)
 
-source("simulatePowerFunction.R")
+source("src/simulatePowerFunction.R")
+source("src/textPanels.R")
 
 pal = c(
   "white" = "#FFFFFF",
@@ -16,11 +17,7 @@ pal = c(
   "pink" = "#da7fc7", 
   "blue" = "#00c2de",
   "green" = "#94d600", 
-  "yellow" = "#ffd800", 
+  "yellow" = "#ffd800",
   "purple" = "#bc84cb", 
   "orange" = "#ff8500"
 )
-
-#TODO:
-# intro text
-# add trtFrac option
