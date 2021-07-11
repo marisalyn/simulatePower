@@ -2,6 +2,11 @@ hr {
   border-top: 2px solid #da7fc7
 }
 
+br {
+   display: block;
+   margin: 10px 0;
+}
+
 .btn {
     border-radius: 6px;
 }

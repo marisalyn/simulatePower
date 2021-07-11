@@ -23,6 +23,7 @@ ui <- fluidPage(
             that will be analyzed using an OLS regression.
             "
         ), 
+        tags$br(), 
         introPanels, 
         
         sidebarPanel(bsCollapse(
