@@ -102,7 +102,7 @@ simulateOLSExperiment <- function(df,
       mutate(
         trt = sample(c(1,0), size=N, replace=TRUE, prob=c(trtFrac, (1-trtFrac))),
         y = as.numeric(!!outcome_sym), 
-        y = if_else(trt == 1, (1 - effectSize) * y, y), 
+        y = if_else(trt == 1, (1 + effectSize) * y, y), 
         trt = as.factor(trt)
       ) %>% 
       select(- !!outcome_sym)
@@ -115,10 +115,4 @@ simulateOLSExperiment <- function(df,
   
   return(mean(significantExperiments))
 }
-
-
-
-
-
-
 

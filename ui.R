@@ -97,8 +97,10 @@ ui <- fluidPage(
                     
                     tags$p("Select an effect size as a fraction of the difference 
                            in means between the treatment and control group, 
-                           e.g. 0.05 implies the treatment group is an average  
-                           of 5 percent higher than the control group"),
+                           e.g. 0.05 implies the average outcome in the treatment group is 
+                           5 percent higher than the control group; -0.05 implies
+                           average outcome in the treatment group is 5 percent 
+                           lower than the control group"),
                     numericInput(
                         inputId = "es",
                         label = NULL, 
@@ -112,8 +114,10 @@ ui <- fluidPage(
                     condition = "input.ssOrEs == 'Effect Size'",
                     tags$p("Enter a range of effect sizes as a fraction of the 
                            difference in means between the treatment and control group, 
-                           e.g. 0.05 implies the treatment group is an average  
-                           of 5 percent higher than the control group"),
+                           e.g. 0.05 implies the average outcome in the treatment group is 
+                           5 percent higher than the control group; -0.05 implies
+                           average outcome in the treatment group is 5 percent 
+                           lower than the control group"),
                     numericRangeInput(
                         inputId = "es2",
                         label = NULL, 

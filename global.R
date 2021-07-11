@@ -21,3 +21,8 @@ pal = c(
   "purple" = "#bc84cb", 
   "orange" = "#ff8500"
 )
+
+# TODO:
+# - add sample data option
+# - clean README
+# - add renv
