@@ -178,7 +178,7 @@ ui <- fluidPage(
             bsCollapsePanel(
                 title = "Select Simulation Parameters", 
                 
-                tags$p("Select alpha value between 0.01 and 0.1 for significance level"),
+                tags$p("Select statistical significance level between 0.01 and 0.1"),
                 numericInput(inputId = "alpha", label = NULL, value = 0.05, min = 0.01, max = 0.1),
                 
                 tags$p("Enter number of repetitions to run per sample/effect size, (Value must be between 1 and 500)"),

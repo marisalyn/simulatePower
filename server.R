@@ -72,8 +72,9 @@ server <- function(input, output, session) {
         inputId = "outcomeVar", 
         label = NULL,
         choices = vars, 
-        selected = NULL
+        selected = "rentals"
       )
+      
     } else {
       req(input$file)
       df <- read.csv(input$file$datapath, header = header()) 
@@ -101,11 +102,17 @@ server <- function(input, output, session) {
   # update picker inputs -----------------------------------------------------
   observeEvent(input$predictorVars, {
     varsAvail <- setdiff(names(dfFull()), input$predictorVars)
+    if (input$outcomeVar %in% input$predictorVars) {
+      selected <- varsAvail[1]
+    } else {
+      selected <- input$outcomeVar
+    }
     updatePickerInput(
       session = session,
       inputId = "outcomeVar", 
       label = NULL,
-      choices = varsAvail
+      choices = varsAvail, 
+      selected = selected
     )
   }, ignoreNULL = FALSE)
   
