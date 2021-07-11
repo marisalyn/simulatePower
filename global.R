@@ -23,6 +23,5 @@ pal = c(
 )
 
 # TODO:
-# - add sample data option
 # - clean README
 # - add renv
