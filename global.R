@@ -21,7 +21,3 @@ pal = c(
   "purple" = "#bc84cb", 
   "orange" = "#ff8500"
 )
-
-# TODO:
-# - clean README
-# - add renv
