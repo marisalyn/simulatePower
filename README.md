@@ -1,5 +1,5 @@
 # simulatePower
-Shiny app for power analysis simulations available here: https://marisalyn.shinyapps.io/powerAnalysisApp_v1/ 
+Shiny app for power analysis simulations available here: https://marisalyn.shinyapps.io/simulatepower/
 
 ### About 
 
